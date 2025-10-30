@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Smart Budget</title>
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Smart Budget&quot;,&quot;short_name&quot;:&quot;Budget&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;}" />
+
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#24303f; --muted:#748094;
+    --brand1:#2c74ff; --brand2:#12b886; --warn:#f59f00; --danger:#e03131;
+    --beige:#f2efe8; --soft:#e8eef8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,var(--beige),var(--bg))}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .title{font-weight:800;color:var(--ink);font-size:20px;letter-spacing:.3px}
+  .actions{display:flex;gap:8px}
+  button,select,input{font:inherit}
+  .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+  .primary{background:linear-gradient(135deg,var(--brand1),#5aa2ff);color:#fff}
+  .ghost{background:#eef2ff;color:#1c3190}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid{grid-template-columns:2fr 1fr}}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 6px 24px rgba(28,37,54,.08);padding:18px}
+  .nav{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+  .nav .tab{padding:12px;border-radius:12px;background:var(--soft);color:var(--ink);font-weight:700;text-align:center;cursor:pointer}
+  .nav .tab.active{background:linear-gradient(135deg,var(--brand1),var(--brand2));color:#fff}
+  h3{margin:0 0 12px 0;color:var(--ink);font-size:16px}
+  .kpis{display:grid;gap:12px;grid-template-columns:repeat(4,1fr)}
+  .kpi{border-left:4px solid var(--soft);background:#fff;padding:14px;border-radius:12px}
+  .kpi .v{font-size:22px;font-weight:800;color:var(--ink)}
+  .kpi .l{color:var(--muted);font-size:12px}
+  .rows{display:flex;gap:12px;flex-wrap:wrap}
+  .pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .ok{background:#eafcf4;color:#0d7b58}
+  .soon{background:#fff4e6;color:#a56a00}
+  .late{background:#ffe3e3;color:#912b2b}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">Smart Budget 💸</div>
+    <div class="actions">
+      <button id="enable-notifications-btn" class="btn ghost">🔔 Enable Notifications</button>
+    </div>
+  </header>
+
+  <div class="card">
+    <h3>Welcome to Smart Budget!</h3>
+    <p>Track your expenses, commitments, and savings in one place. Get reminders for payments and birthdays automatically.</p>
+  </div>
+</div>
+
+<!-- ✅ OneSignal Push Notifications -->
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+<script>
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {
+    OneSignal.init({
+      appId: "5dbef29c-1d7a-403d-9399-b2566983cc30",
+      allowLocalhostAsSecureOrigin: true,
+      notifyButton: { enable: false }
+    });
+  });
+
+  // عند الضغط على زر التفعيل
+  const btn = document.getElementById('enable-notifications-btn');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      try {
+        await OneSignal.Slidedown.promptPush();
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
+</script>
+</body>
+</html>
