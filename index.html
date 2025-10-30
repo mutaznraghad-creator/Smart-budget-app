@@ -1,105 +1,263 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Budget</title>
-
-  <style>
-    :root {
-      --bg: #f6f7f9;
-      --card: #ffffff;
-      --ink: #243447;
-      --brand1: #2c74ff;
-      --brand2: #12b886;
-      --beige: #f2efe8;
-      --soft: #e8eef8;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-    }
-
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px;
-      background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .title {
-      font-weight: 800;
-      color: var(--ink);
-      font-size: 1.3rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    main {
-      margin-top: 40px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      text-align: center;
-    }
-
-    h2 {
-      color: #00a67d;
-      margin-bottom: 10px;
-    }
-
-    p {
-      color: #444;
-      line-height: 1.6;
-    }
-
-    footer {
-      text-align: center;
-      padding: 40px 0 10px;
-      color: #777;
-      font-size: 0.9rem;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Smart Budget</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1e293b;--muted:#64748b;--brand:#2c74ff;--ok:#12b886;--warn:#f59e0b;--bad:#ef4444}
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:1000px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:14px 16px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+  .title{font-weight:800;font-size:1.2rem;display:flex;gap:8px;align-items:center}
+  nav{display:flex;gap:8px;flex-wrap:wrap}
+  button, .btn{appearance:none;border:0;outline:0;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700}
+  .tab{background:#e5edff;color:#1e3a8a} .tab.active{background:var(--brand);color:#fff}
+  main{margin-top:18px;display:grid;gap:16px}
+  .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+  .grid{display:grid;gap:12px}
+  @media(min-width:780px){.grid.cols-3{grid-template-columns:repeat(3,1fr)}.grid.cols-2{grid-template-columns:repeat(2,1fr)}}
+  .kpi{display:flex;flex-direction:column;gap:4px}
+  .kpi h3{margin:0;font-size:.95rem;color:var(--muted)}
+  .kpi .val{font-size:1.4rem;font-weight:900}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  label{font-size:.9rem;color:var(--muted)}
+  input,select{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
+  .row{display:grid;gap:10px}
+  @media(min-width:720px){.row.cols-3{grid-template-columns:2fr 1fr 1fr}.row.cols-2{grid-template-columns:2fr 1fr}}
+  table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid #eef2f7;font-size:.95rem}
+  th{color:#475569;text-align:left} .right{text-align:right}
+  .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.8rem;background:#eef2ff;color:#1e3a8a}
+  .actions a{color:var(--bad);text-decoration:none;font-weight:700}
+  footer{text-align:center;color:#94a3b8;font-size:.9rem;margin:22px 0}
+  .hidden{display:none}
+</style>
 </head>
-
 <body>
-  <div class="wrap">
-    <header>
-      <h1 class="title">Smart Budget 💰</h1>
-    </header>
+<div class="wrap">
+  <header>
+    <div class="title">Smart Budget 💰</div>
+    <nav>
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="add-expense">Add Expense</button>
+      <button class="tab" data-tab="add-commit">Add Commitment</button>
+      <button class="tab" data-tab="add-saving">Add Saving</button>
+    </nav>
+  </header>
 
-    <main>
-      <div class="card">
-        <h2>Welcome to Smart Budget!</h2>
-        <p>Track your expenses, commitments, and savings in one place.<br>
-        Get reminders for payments and birthdays automatically (coming soon).</p>
+  <main>
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="card">
+      <h2>Overview</h2>
+      <div class="grid cols-3" style="margin-top:8px">
+        <div class="kpi"><h3>Total Expenses (month)</h3><div class="val bad" id="kpi-exp">0</div></div>
+        <div class="kpi"><h3>Commitments (month)</h3><div class="val warn" id="kpi-com">0</div></div>
+        <div class="kpi"><h3>Savings (month)</h3><div class="val ok" id="kpi-sav">0</div></div>
       </div>
-    </main>
 
-    <footer>
-      © 2025 Smart Budget — All rights reserved.
-    </footer>
-  </div>
+      <div class="grid cols-2" style="margin-top:14px">
+        <div class="card">
+          <h3 style="margin-top:0">Recent Expenses</h3>
+          <table id="tbl-exp">
+            <thead><tr><th>Name</th><th class="right">Amount</th><th>Date</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Upcoming Commitments</h3>
+          <table id="tbl-com">
+            <thead><tr><th>Name</th><th class="right">/Month</th><th>Due</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD EXPENSE -->
+    <section id="add-expense" class="card hidden">
+      <h2>Add Expense</h2>
+      <div class="row cols-3">
+        <div>
+          <label>Title</label>
+          <input id="exp-title" placeholder="Groceries, taxi, etc.">
+        </div>
+        <div>
+          <label>Amount</label>
+          <input id="exp-amount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label>Date</label>
+          <input id="exp-date" type="date">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button id="btn-add-exp">Save Expense</button>
+      </div>
+    </section>
+
+    <!-- ADD COMMITMENT -->
+    <section id="add-commit" class="card hidden">
+      <h2>Add Commitment</h2>
+      <div class="row cols-3">
+        <div>
+          <label>Name</label>
+          <input id="com-title" placeholder="Rent, Internet, Insurance...">
+        </div>
+        <div>
+          <label>Monthly amount</label>
+          <input id="com-amount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label>Due day (1-28)</label>
+          <input id="com-due" type="number" min="1" max="28" placeholder="1">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button id="btn-add-com">Save Commitment</button>
+      </div>
+    </section>
+
+    <!-- ADD SAVING -->
+    <section id="add-saving" class="card hidden">
+      <h2>Add Saving</h2>
+      <div class="row cols-2">
+        <div>
+          <label>Goal / Note</label>
+          <input id="sav-title" placeholder="Emergency fund, Trip, …">
+        </div>
+        <div>
+          <label>Amount</label>
+          <input id="sav-amount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button id="btn-add-sav">Save Saving</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2025 Smart Budget — All rights reserved.</footer>
+</div>
+
+<script>
+/* ---------- simple storage ---------- */
+const KEY = 'sb_data_v1';
+function load(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || {expenses:[], commitments:[], savings:[]} }catch{ return {expenses:[], commitments:[], savings:[]} }
+}
+function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
+
+const $ = s => document.querySelector(s);
+const fmt = n => (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+
+/* --------- tabs --------- */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const id = btn.dataset.tab;
+    document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  });
+});
+
+/* --------- render dashboard --------- */
+function monthKey(d){ const x = new Date(d); return isNaN(x)? null : (x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')); }
+function refresh(){
+  const data = load();
+  // KPIs for current month
+  const now = new Date(); const mk = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const expM = data.expenses.filter(e=>monthKey(e.date)===mk).reduce((a,b)=>a+Number(b.amount),0);
+  const comM = data.commitments.reduce((a,b)=>a+Number(b.amount),0);
+  const savM = data.savings.filter(e=>monthKey(e.created)===mk).reduce((a,b)=>a+Number(b.amount),0);
+  $('#kpi-exp').textContent = fmt(expM);
+  $('#kpi-com').textContent = fmt(comM);
+  $('#kpi-sav').textContent = fmt(savM);
+
+  // recent expenses (last 7)
+  const expTbody = $('#tbl-exp tbody');
+  expTbody.innerHTML = '';
+  data.expenses.slice(-7).reverse().forEach((e,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${e.title||'-'}</td>
+      <td class="right">${fmt(e.amount)}</td>
+      <td>${e.date||''}</td>
+      <td class="actions"><a href="#" data-type="exp" data-id="${e.id}">Delete</a></td>`;
+    expTbody.appendChild(tr);
+  });
+
+  // commitments
+  const comTbody = $('#tbl-com tbody');
+  comTbody.innerHTML = '';
+  data.commitments.slice().reverse().forEach((c)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.title||'-'} <span class="pill">day ${c.due}</span></td>
+      <td class="right">${fmt(c.amount)}</td>
+      <td>${c.due}</td>
+      <td class="actions"><a href="#" data-type="com" data-id="${c.id}">Delete</a></td>`;
+    comTbody.appendChild(tr);
+  });
+
+  // delete handlers
+  document.querySelectorAll('.actions a').forEach(a=>{
+    a.onclick = (ev)=>{
+      ev.preventDefault();
+      const type = a.dataset.type, id = a.dataset.id;
+      const d = load();
+      if(type==='exp'){ d.expenses = d.expenses.filter(x=>x.id!==id); }
+      if(type==='com'){ d.commitments = d.commitments.filter(x=>x.id!==id); }
+      save(d); refresh();
+    };
+  });
+}
+
+/* -------- add handlers -------- */
+$('#btn-add-exp').onclick = ()=>{
+  const title = $('#exp-title').value.trim();
+  const amount = Number($('#exp-amount').value);
+  const date = $('#exp-date').value || new Date().toISOString().slice(0,10);
+  if(!amount){ alert('Enter a valid amount'); return; }
+  const d = load();
+  d.expenses.push({id:crypto.randomUUID(), title, amount, date});
+  save(d);
+  $('#exp-title').value=''; $('#exp-amount').value=''; $('#exp-date').value='';
+  document.querySelector('[data-tab="dashboard"]').click();
+  refresh();
+};
+
+$('#btn-add-com').onclick = ()=>{
+  const title = $('#com-title').value.trim();
+  const amount = Number($('#com-amount').value);
+  let due = parseInt($('#com-due').value||'1',10);
+  if(!amount){ alert('Enter a valid amount'); return; }
+  if(due<1||due>28) due = 1;
+  const d = load();
+  d.commitments.push({id:crypto.randomUUID(), title, amount, due});
+  save(d);
+  $('#com-title').value=''; $('#com-amount').value=''; $('#com-due').value='';
+  document.querySelector('[data-tab="dashboard"]').click();
+  refresh();
+};
+
+$('#btn-add-sav').onclick = ()=>{
+  const title = $('#sav-title').value.trim();
+  const amount = Number($('#sav-amount').value);
+  if(!amount){ alert('Enter a valid amount'); return; }
+  const d = load();
+  d.savings.push({id:crypto.randomUUID(), title, amount, created:new Date().toISOString().slice(0,10)});
+  save(d);
+  $('#sav-title').value=''; $('#sav-amount').value='';
+  document.querySelector('[data-tab="dashboard"]').click();
+  refresh();
+};
+
+/* init */
+(() => {
+  // set default date for convenience
+  const today = new Date().toISOString().slice(0,10);
+  const dd = document.getElementById('exp-date'); if(dd) dd.value = today;
+  refresh();
+})();
+</script>
 </body>
 </html>
