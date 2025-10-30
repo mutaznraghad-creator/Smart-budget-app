@@ -1,263 +1,605 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Smart Budget</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Budget & Commitments Dashboard</title>
+<link rel="manifest" href="data:application/json,{ }">
+<!-- Icons (Feather) -->
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 <style>
-  :root{--bg:#f6f7f9;--card:#fff;--ink:#1e293b;--muted:#64748b;--brand:#2c74ff;--ok:#12b886;--warn:#f59e0b;--bad:#ef4444}
-  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:1000px;margin:0 auto;padding:16px}
-  header{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:14px 16px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
-  .title{font-weight:800;font-size:1.2rem;display:flex;gap:8px;align-items:center}
-  nav{display:flex;gap:8px;flex-wrap:wrap}
-  button, .btn{appearance:none;border:0;outline:0;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700}
-  .tab{background:#e5edff;color:#1e3a8a} .tab.active{background:var(--brand);color:#fff}
-  main{margin-top:18px;display:grid;gap:16px}
-  .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
-  .grid{display:grid;gap:12px}
-  @media(min-width:780px){.grid.cols-3{grid-template-columns:repeat(3,1fr)}.grid.cols-2{grid-template-columns:repeat(2,1fr)}}
-  .kpi{display:flex;flex-direction:column;gap:4px}
-  .kpi h3{margin:0;font-size:.95rem;color:var(--muted)}
-  .kpi .val{font-size:1.4rem;font-weight:900}
-  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
-  label{font-size:.9rem;color:var(--muted)}
-  input,select{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
-  .row{display:grid;gap:10px}
-  @media(min-width:720px){.row.cols-3{grid-template-columns:2fr 1fr 1fr}.row.cols-2{grid-template-columns:2fr 1fr}}
-  table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid #eef2f7;font-size:.95rem}
-  th{color:#475569;text-align:left} .right{text-align:right}
-  .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.8rem;background:#eef2ff;color:#1e3a8a}
-  .actions a{color:var(--bad);text-decoration:none;font-weight:700}
-  footer{text-align:center;color:#94a3b8;font-size:.9rem;margin:22px 0}
-  .hidden{display:none}
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#243147; --muted:#56627a;
+  --sage:#5A7768; --sage-soft:#E5EFEA; --sage-accent:#9AB7A9;
+  --blue:#2C74FF; --blue-soft:#E7EFFF; --blue-accent:#9DB5FF;
+  --sand:#C9B79D; --sand-soft:#F4EFE7; --sand-accent:#E3D6C2;
+  --brand: var(--sage); --surface: var(--sage-soft); --accent: var(--sage-accent);
+  --ok:#23a26d; --warn:#ffb020; --bad:#ef5350; --info:#2c74ff; --soft:#e8eef8;
+  --radius:18px; --shadow:0 8px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand h1{font-size:22px;margin:0;font-weight:800}
+.tag{background:var(--surface);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--brand);border:1px solid rgba(0,0,0,.05)}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+select, input[type="date"], input[type="text"], input[type="number"]{
+  padding:10px 12px;border-radius:12px;border:1px solid #dfe3ea;background:#fff;font-size:14px;color:var(--ink)
+}
+button{background:var(--brand);color:#fff;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+button.secondary{background:var(--surface);color:var(--brand);border:1px solid rgba(0,0,0,.06)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 18px}
+.tab{background:#fff;border:1px solid #e6e9f0;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--brand);color:#fff;border-color:transparent}
+.grid{display:grid;gap:16px}
+.cards-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:900px){.cards-4{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.cards-4{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.card h3{margin:0 0 8px;font-size:16px}
+.big{font-size:28px;font-weight:900;margin-top:2px}
+.sub{color:var(--muted);font-size:13px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th,td{text-align:left;padding:10px 12px;font-size:14px;background:#fff}
+th{font-size:12px;color:#6b7488;background:transparent;padding:0 12px 6px}
+tr td{border-top:1px solid #eef1f6;border-bottom:1px solid #eef1f6}
+tr td:first-child{border-left:1px solid #eef1f6;border-top-left-radius:12px;border-bottom-left-radius:12px}
+tr td:last-child{border-right:1px solid #eef1f6;border-top-right-radius:12px;border-bottom-right-radius:12px}
+.badge{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-block}
+.badge.ok{background:#e8f7f0;color:var(--ok)}
+.badge.warn{background:#fff5e6;color:var(--warn)}
+.badge.bad{background:#ffe8e8;color:var(--bad)}
+.kpi{display:flex;align-items:baseline;justify-content:space-between}
+.progress{height:10px;background:#eef1f6;border-radius:999px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--brand);width:0%}
+.quote{padding:14px;border-radius:12px;background:var(--surface);color:var(--brand);font-weight:700;border:1px dashed var(--accent)}
+footer{opacity:.7;font-size:12px;margin:28px 0;text-align:center}
+.help pre{white-space:pre-wrap;background:#fafbff;padding:12px;border-radius:10px;border:1px solid #ebeff6}
+.hr{height:1px;background:#eceff6;margin:12px 0;border-radius:999px}
+.small{font-size:12px;color:#6b7488}
+.toggle{display:inline-flex;align-items:center;gap:6px}
+.toggle input{transform:scale(1.2)}
+/* status colors rows */
+tr.dueSoon td{background:linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ffedd5,#fff) border-box}
+tr.overdue td{background:linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ffe4e6,#fff) border-box}
+tr.paid td{background:linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#dcfce7,#fff) border-box}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="title">Smart Budget 💰</div>
-    <nav>
-      <button class="tab active" data-tab="dashboard">Dashboard</button>
-      <button class="tab" data-tab="add-expense">Add Expense</button>
-      <button class="tab" data-tab="add-commit">Add Commitment</button>
-      <button class="tab" data-tab="add-saving">Add Saving</button>
-    </nav>
+    <div class="brand">
+      <span class="tag">💸</span>
+      <h1>Smart Budget</h1>
+      <span class="tag" id="monthTag"></span>
+    </div>
+    <div class="controls">
+      <input id="userName" type="text" placeholder="Your name" style="min-width:160px">
+      <select id="currency">
+        <option value="€">€ EUR</option>
+        <option value="$">$ USD</option>
+        <option value="£">£ GBP</option>
+        <option value="﷼">﷼ SAR</option>
+      </select>
+      <select id="theme">
+        <option value="sage">Sage</option>
+        <option value="blue">Blue</option>
+        <option value="sand">Sand</option>
+      </select>
+    </div>
   </header>
 
-  <main>
-    <!-- DASHBOARD -->
-    <section id="dashboard" class="card">
-      <h2>Overview</h2>
-      <div class="grid cols-3" style="margin-top:8px">
-        <div class="kpi"><h3>Total Expenses (month)</h3><div class="val bad" id="kpi-exp">0</div></div>
-        <div class="kpi"><h3>Commitments (month)</h3><div class="val warn" id="kpi-com">0</div></div>
-        <div class="kpi"><h3>Savings (month)</h3><div class="val ok" id="kpi-sav">0</div></div>
-      </div>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="dash">Dashboard</button>
+    <button class="tab" data-tab="commitments">Commitments</button>
+    <button class="tab" data-tab="expenses">Expenses</button>
+    <button class="tab" data-tab="savings">Savings</button>
+    <button class="tab" data-tab="events">Events</button>
+    <button class="tab" data-tab="analysis">Analysis</button>
+    <button class="tab" data-tab="notes">Notes</button>
+    <button class="tab" data-tab="help">Help</button>
+  </div>
 
-      <div class="grid cols-2" style="margin-top:14px">
+  <!-- DASHBOARD -->
+  <section id="dash" class="view">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="welcomeTitle">Welcome, Friend 👋</h2>
+        <div class="quote">“Track your money. Master your life.”</div>
+      </div>
+      <div class="grid cards-4">
         <div class="card">
-          <h3 style="margin-top:0">Recent Expenses</h3>
-          <table id="tbl-exp">
-            <thead><tr><th>Name</th><th class="right">Amount</th><th>Date</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
+          <div class="kpi"><h3>Total Balance</h3><span class="small">Income − Out</span></div>
+          <div class="big" id="kpiBalance">0.00</div>
         </div>
         <div class="card">
-          <h3 style="margin-top:0">Upcoming Commitments</h3>
-          <table id="tbl-com">
-            <thead><tr><th>Name</th><th class="right">/Month</th><th>Due</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
+          <div class="kpi"><h3>Total Expenses (month)</h3><span class="small">variable</span></div>
+          <div class="big" id="kpiExpenses">0.00</div>
+        </div>
+        <div class="card">
+          <div class="kpi"><h3>% Commitments Paid</h3><span class="small" id="kpiPaidLabel"></span></div>
+          <div class="progress" title="% Paid"><i id="progressPaid"></i></div>
+          <div class="big" id="kpiPaid">0%</div>
+        </div>
+        <div class="card">
+          <div class="kpi"><h3>Next Event</h3><span class="small">countdown</span></div>
+          <div class="big" id="kpiNextEvent">—</div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ADD EXPENSE -->
-    <section id="add-expense" class="card hidden">
-      <h2>Add Expense</h2>
-      <div class="row cols-3">
-        <div>
-          <label>Title</label>
-          <input id="exp-title" placeholder="Groceries, taxi, etc.">
-        </div>
-        <div>
-          <label>Amount</label>
-          <input id="exp-amount" type="number" min="0" step="0.01" placeholder="0.00">
-        </div>
-        <div>
-          <label>Date</label>
-          <input id="exp-date" type="date">
+  <!-- COMMITMENTS -->
+  <section id="commitments" class="view" style="display:none">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>Commitments (Fixed Payments)</h2>
+        <div class="row">
+          <input id="cName" placeholder="Commitment name">
+          <select id="cCat"></select>
+          <input id="cAmt" type="number" step="0.01" placeholder="Monthly">
+          <input id="cDue" type="date">
+          <button id="addCommitment">+ Add</button>
         </div>
       </div>
-      <div style="margin-top:12px">
-        <button id="btn-add-exp">Save Expense</button>
+      <div class="hr"></div>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Category</th><th>Monthly</th><th>Due</th><th>Status</th><th>Notes</th><th></th></tr>
+        </thead>
+        <tbody id="commitBody"></tbody>
+      </table>
+      <div class="row" style="justify-content:space-between;margin-top:8px">
+        <div class="badge">Total: <span id="commitTotal">0.00</span></div>
+        <div class="row" style="gap:16px">
+          <div class="badge ok">Paid: <span id="commitPaidCnt">0</span></div>
+          <div class="badge warn">Due soon</div>
+          <div class="badge bad">Overdue</div>
+          <div class="badge">Next due in <span id="nextDueDays">—</span> days</div>
+        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ADD COMMITMENT -->
-    <section id="add-commit" class="card hidden">
-      <h2>Add Commitment</h2>
-      <div class="row cols-3">
-        <div>
-          <label>Name</label>
-          <input id="com-title" placeholder="Rent, Internet, Insurance...">
-        </div>
-        <div>
-          <label>Monthly amount</label>
-          <input id="com-amount" type="number" min="0" step="0.01" placeholder="0.00">
-        </div>
-        <div>
-          <label>Due day (1-28)</label>
-          <input id="com-due" type="number" min="1" max="28" placeholder="1">
+  <!-- EXPENSES -->
+  <section id="expenses" class="view" style="display:none">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>Expenses (Variable)</h2>
+        <div class="row">
+          <input id="eDate" type="date">
+          <select id="eCat"></select>
+          <input id="eDesc" placeholder="Description">
+          <input id="eAmt" type="number" step="0.01" placeholder="Amount">
+          <select id="eMethod">
+            <option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option>
+          </select>
+          <button id="addExpense">+ Add</button>
         </div>
       </div>
-      <div style="margin-top:12px">
-        <button id="btn-add-com">Save Commitment</button>
+      <div class="hr"></div>
+      <div class="row" style="gap:16px;flex-wrap:wrap">
+        <div class="badge">Total: <span id="expTotal">0.00</span></div>
+        <div class="badge">Top 3: <span id="expTop3">—</span></div>
+        <div class="badge">Avg/day: <span id="expAvg">0.00</span></div>
       </div>
-    </section>
+      <table>
+        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Method</th><th></th></tr></thead>
+        <tbody id="expBody"></tbody>
+      </table>
+    </div>
+  </section>
 
-    <!-- ADD SAVING -->
-    <section id="add-saving" class="card hidden">
-      <h2>Add Saving</h2>
-      <div class="row cols-2">
-        <div>
-          <label>Goal / Note</label>
-          <input id="sav-title" placeholder="Emergency fund, Trip, …">
-        </div>
-        <div>
-          <label>Amount</label>
-          <input id="sav-amount" type="number" min="0" step="0.01" placeholder="0.00">
+  <!-- SAVINGS -->
+  <section id="savings" class="view" style="display:none">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>Saving Plans</h2>
+        <div class="row">
+          <input id="sGoal" placeholder="Goal name">
+          <select id="sCat"><option>Vacation</option><option>Wedding</option><option>Investment</option><option>Other</option></select>
+          <input id="sTarget" type="number" step="0.01" placeholder="Target">
+          <input id="sStart" type="date">
+          <input id="sEnd" type="date">
+          <label class="toggle"><input id="sToCommit" type="checkbox">Add to Commitments</label>
+          <button id="addSaving">+ Add</button>
         </div>
       </div>
-      <div style="margin-top:12px">
-        <button id="btn-add-sav">Save Saving</button>
+      <div class="hr"></div>
+      <table>
+        <thead>
+          <tr><th>Goal</th><th>Category</th><th>Target</th><th>Months</th><th>Monthly</th><th>Start</th><th>End</th><th>Progress</th><th></th></tr>
+        </thead>
+        <tbody id="saveBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="events" class="view" style="display:none">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>Events & Gifts</h2>
+        <div class="row">
+          <input id="vName" placeholder="Event name">
+          <select id="vType"><option>Birthday</option><option>Wedding</option><option>Holiday</option><option>Gift</option><option>Other</option></select>
+          <input id="vDate" type="date">
+          <input id="vPlan" type="number" step="0.01" placeholder="Planned spending">
+          <label class="toggle"><input id="vToCommit" type="checkbox">Add to Commitments</label>
+          <button id="addEvent">+ Add</button>
+        </div>
       </div>
-    </section>
-  </main>
+      <div class="hr"></div>
+      <table>
+        <thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminder</th><th></th></tr></thead>
+        <tbody id="eventBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ANALYSIS -->
+  <section id="analysis" class="view" style="display:none">
+    <div class="grid cards-4">
+      <div class="card"><h3>Expenses by Category</h3><canvas id="donutCat" height="210"></canvas></div>
+      <div class="card"><h3>Weekly Spend</h3><canvas id="barWeek" height="210"></canvas></div>
+      <div class="card"><h3>Commitments vs Paid</h3><canvas id="commitChart" height="210"></canvas></div>
+      <div class="card"><h3>Savings Monthly Target</h3><canvas id="saveChart" height="210"></canvas></div>
+    </div>
+  </section>
+
+  <!-- NOTES / HELP -->
+  <section id="notes" class="view" style="display:none">
+    <div class="card"><h2>Notes</h2><textarea id="notesTxt" style="width:100%;height:220px;border:1px solid #e6e9f0;border-radius:14px;padding:12px"></textarea></div>
+  </section>
+
+  <section id="help" class="view help" style="display:none">
+    <div class="card">
+      <h2>Google Sheets Helper Formulas</h2>
+      <pre>
+Days to Event: =[Event_Date] - TODAY()
+Months to Save: =DATEDIF([Start_Date],[End_Date],"M")+1
+Monthly Contribution: =ROUNDUP([Target_Amount]/[Months_to_Save],2)
+Status (Commitments):
+=IF([Paid] >= [Amount], "Paid",
+ IF([Due_Date] < TODAY(), "Overdue",
+  IF([Due_Date] - TODAY() <= 3, "Due Soon", "Pending")))
+Expense by Category: =SUMIF([Category_Col],[Category],[Amount_Col])
+      </pre>
+      <div class="hr"></div>
+      <h3>How to use</h3>
+      <ul>
+        <li>اكتبي اسمك في أعلى الصفحة—يظهر تلقائيًا في الترحيب.</li>
+        <li>اختاري العملة والثيم من الشريط العلوي.</li>
+        <li>أضيفي التزامات ثابتة، مصروفات يومية، خطط ادخار، وأحداث. كل شيء يُحفَظ في المتصفح.</li>
+        <li>زر “Add to Commitments” في الادخار أو الأحداث ينشئ بندًا تلقائيًا ضمن التزامات الشهر.</li>
+        <li>قسم Analysis يترسم تلقائيًا حسب بياناتك.</li>
+      </ul>
+    </div>
+  </section>
 
   <footer>© 2025 Smart Budget — All rights reserved.</footer>
 </div>
 
 <script>
-/* ---------- simple storage ---------- */
-const KEY = 'sb_data_v1';
-function load(){
-  try{ return JSON.parse(localStorage.getItem(KEY)) || {expenses:[], commitments:[], savings:[]} }catch{ return {expenses:[], commitments:[], savings:[]} }
+/* ===================== State & Utils ======================= */
+const $ = s=>document.querySelector(s);
+const $$ = s=>document.querySelectorAll(s);
+const store = {
+  get: (k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set: (k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+const CATS = ["Groceries","Coffee & Snacks","Dining Out","Household Supplies","Fuel / Gas","Public Transport","Car Maintenance","Rent / Mortgage","Electricity","Water","Internet & Phone","Home Maintenance","Healthcare / Medicine","Insurance","Gym / Fitness","Personal Care","Clothing & Accessories","Gifts & Celebrations","Entertainment","Hobbies & Subscriptions","Courses & Learning","Books & Materials","Work Expenses","Software & Apps","Savings / Investments","Travel","Accommodation","Activities & Tickets","Donations & Charity","Taxes & Fees","Miscellaneous"];
+const fmt = (n)=> (currency.value||"€") + " " + (Number(n||0).toFixed(2));
+const todayISO = ()=> new Date().toISOString().slice(0,10);
+$("#monthTag").textContent = new Date().toLocaleString(undefined,{month:'long', year:'numeric'});
+
+/* ===================== Theme / Settings ===================== */
+const userName = $("#userName");
+const currency = $("#currency");
+const theme = $("#theme");
+(function initSettings(){
+  userName.value = store.get("name",""); applyName();
+  currency.value = store.get("cur","€");
+  theme.value = store.get("theme","sage"); applyTheme();
+})();
+userName.addEventListener("input", ()=>{store.set("name",userName.value); applyName();});
+currency.addEventListener("change", ()=>{store.set("cur",currency.value); renderAll();});
+theme.addEventListener("change", ()=>{store.set("theme",theme.value); applyTheme();});
+function applyName(){ $("#welcomeTitle").textContent = `Welcome, ${userName.value||"Friend"} 👋`; }
+function applyTheme(){
+  const t = theme.value;
+  if(t==="blue"){document.documentElement.style.setProperty('--brand','var(--blue)');document.documentElement.style.setProperty('--surface','var(--blue-soft)');document.documentElement.style.setProperty('--accent','var(--blue-accent)');}
+  else if(t==="sand"){document.documentElement.style.setProperty('--brand','var(--sand)');document.documentElement.style.setProperty('--surface','var(--sand-soft)');document.documentElement.style.setProperty('--accent','var(--sand-accent)');}
+  else {document.documentElement.style.setProperty('--brand','var(--sage)');document.documentElement.style.setProperty('--surface','var(--sage-soft)');document.documentElement.style.setProperty('--accent','var(--sage-accent)');}
 }
-function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
 
-const $ = s => document.querySelector(s);
-const fmt = n => (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
-
-/* --------- tabs --------- */
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const id = btn.dataset.tab;
-    document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-  });
+/* ===================== Tabs ===================== */
+$("#tabs").addEventListener("click", (e)=>{
+  if(!e.target.classList.contains("tab")) return;
+  $$(".tab").forEach(t=>t.classList.remove("active"));
+  e.target.classList.add("active");
+  const id = e.target.dataset.tab;
+  $$(".view").forEach(v=>v.style.display = (v.id===id?"block":"none"));
+  if(id==="analysis") drawCharts();
 });
 
-/* --------- render dashboard --------- */
-function monthKey(d){ const x = new Date(d); return isNaN(x)? null : (x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')); }
-function refresh(){
-  const data = load();
-  // KPIs for current month
-  const now = new Date(); const mk = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  const expM = data.expenses.filter(e=>monthKey(e.date)===mk).reduce((a,b)=>a+Number(b.amount),0);
-  const comM = data.commitments.reduce((a,b)=>a+Number(b.amount),0);
-  const savM = data.savings.filter(e=>monthKey(e.created)===mk).reduce((a,b)=>a+Number(b.amount),0);
-  $('#kpi-exp').textContent = fmt(expM);
-  $('#kpi-com').textContent = fmt(comM);
-  $('#kpi-sav').textContent = fmt(savM);
+/* ===================== Dropdown seeds ===================== */
+function seedDropdowns(){
+  const catOpts = CATS.map(c=>`<option>${c}</option>`).join('');
+  $("#cCat").innerHTML = catOpts;
+  $("#eCat").innerHTML = catOpts;
+}
+seedDropdowns();
 
-  // recent expenses (last 7)
-  const expTbody = $('#tbl-exp tbody');
-  expTbody.innerHTML = '';
-  data.expenses.slice(-7).reverse().forEach((e,i)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${e.title||'-'}</td>
-      <td class="right">${fmt(e.amount)}</td>
-      <td>${e.date||''}</td>
-      <td class="actions"><a href="#" data-type="exp" data-id="${e.id}">Delete</a></td>`;
-    expTbody.appendChild(tr);
-  });
+/* ===================== Data ===================== */
+let commitments = store.get("commitments",[]);
+let expenses = store.get("expenses",[]);
+let savings = store.get("savings",[]);
+let events = store.get("events",[]);
+$("#notesTxt").value = store.get("notes","");
 
-  // commitments
-  const comTbody = $('#tbl-com tbody');
-  comTbody.innerHTML = '';
-  data.commitments.slice().reverse().forEach((c)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${c.title||'-'} <span class="pill">day ${c.due}</span></td>
-      <td class="right">${fmt(c.amount)}</td>
-      <td>${c.due}</td>
-      <td class="actions"><a href="#" data-type="com" data-id="${c.id}">Delete</a></td>`;
-    comTbody.appendChild(tr);
+/* ===================== Commitments ===================== */
+$("#addCommitment").onclick = ()=>{
+  const item = {
+    id: crypto.randomUUID(),
+    name: $("#cName").value.trim()||"Untitled",
+    cat: $("#cCat").value,
+    amt: +($("#cAmt").value||0),
+    due: $("#cDue").value || todayISO(),
+    status: "Pending",
+    notes:""
+  };
+  commitments.push(item); store.set("commitments",commitments);
+  $("#cName").value=""; $("#cAmt").value=""; $("#cDue").value="";
+  renderCommitments(); renderAll();
+};
+function renderCommitments(){
+  const tbody = $("#commitBody"); tbody.innerHTML = "";
+  const today = new Date();
+  let paidCnt=0, total=0, minDays = Infinity;
+  commitments.forEach(row=>{
+    total += row.amt;
+    const due = new Date(row.due);
+    const dLeft = Math.ceil((due - today)/(1000*60*60*24));
+    let cls = "";
+    if(row.status==="Paid"){cls="paid"; paidCnt++;}
+    else if(dLeft<0){cls="overdue";}
+    else if(dLeft<=3){cls="dueSoon";}
+    minDays = Math.min(minDays, dLeft);
+    const tr = document.createElement("tr"); tr.className = cls;
+    tr.innerHTML = `
+      <td>${row.name}</td>
+      <td>${row.cat}</td>
+      <td>${fmt(row.amt)}</td>
+      <td>${row.due}</td>
+      <td>
+        <select data-id="${row.id}" class="cStatus">
+          <option ${row.status==="Paid"?"selected":""}>Paid</option>
+          <option ${row.status==="Pending"?"selected":""}>Pending</option>
+          <option ${row.status==="Overdue"?"selected":""}>Overdue</option>
+        </select>
+      </td>
+      <td contenteditable data-note="${row.id}">${row.notes||""}</td>
+      <td><button class="secondary" data-delc="${row.id}">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
   });
+  $("#commitTotal").textContent = fmt(total);
+  $("#commitPaidCnt").textContent = paidCnt+"/"+commitments.length;
+  $("#nextDueDays").textContent = commitments.length? (isFinite(minDays)?minDays:"—") : "—";
 
-  // delete handlers
-  document.querySelectorAll('.actions a').forEach(a=>{
-    a.onclick = (ev)=>{
-      ev.preventDefault();
-      const type = a.dataset.type, id = a.dataset.id;
-      const d = load();
-      if(type==='exp'){ d.expenses = d.expenses.filter(x=>x.id!==id); }
-      if(type==='com'){ d.commitments = d.commitments.filter(x=>x.id!==id); }
-      save(d); refresh();
-    };
-  });
+  // events
+  tbody.addEventListener("change", e=>{
+    if(e.target.classList.contains("cStatus")){
+      const id = e.target.dataset.id;
+      const r = commitments.find(x=>x.id===id);
+      r.status = e.target.value; store.set("commitments",commitments); renderAll();
+    }
+  }, {once:true});
+  tbody.addEventListener("input", e=>{
+    if(e.target.hasAttribute("data-note")){
+      const id = e.target.getAttribute("data-note");
+      const r = commitments.find(x=>x.id===id);
+      r.notes = e.target.textContent; store.set("commitments",commitments);
+    }
+  }, {once:true});
+  tbody.addEventListener("click", e=>{
+    if(e.target.dataset.delc){
+      commitments = commitments.filter(x=>x.id!==e.target.dataset.delc);
+      store.set("commitments",commitments); renderCommitments(); renderAll();
+    }
+  }, {once:true});
 }
 
-/* -------- add handlers -------- */
-$('#btn-add-exp').onclick = ()=>{
-  const title = $('#exp-title').value.trim();
-  const amount = Number($('#exp-amount').value);
-  const date = $('#exp-date').value || new Date().toISOString().slice(0,10);
-  if(!amount){ alert('Enter a valid amount'); return; }
-  const d = load();
-  d.expenses.push({id:crypto.randomUUID(), title, amount, date});
-  save(d);
-  $('#exp-title').value=''; $('#exp-amount').value=''; $('#exp-date').value='';
-  document.querySelector('[data-tab="dashboard"]').click();
-  refresh();
+/* ===================== Expenses ===================== */
+$("#addExpense").onclick = ()=>{
+  const row = {
+    id: crypto.randomUUID(),
+    date: $("#eDate").value || todayISO(),
+    cat: $("#eCat").value,
+    desc: $("#eDesc").value.trim(),
+    amt: +($("#eAmt").value||0),
+    method: $("#eMethod").value
+  };
+  expenses.push(row); store.set("expenses",expenses);
+  $("#eDesc").value=""; $("#eAmt").value="";
+  renderExpenses(); renderAll();
 };
+function renderExpenses(){
+  const tbody = $("#expBody"); tbody.innerHTML="";
+  let total = 0; const byCat = {};
+  expenses.forEach(r=>{
+    total += r.amt; byCat[r.cat] = (byCat[r.cat]||0)+r.amt;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${r.date}</td><td>${r.cat}</td><td>${r.desc||""}</td><td>${fmt(r.amt)}</td><td>${r.method}</td><td><button class="secondary" data-dele="${r.id}">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  $("#expTotal").textContent = fmt(total);
+  const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join(", ") || "—";
+  $("#expTop3").textContent = top;
+  // avg per day (distinct dates)
+  const days = new Set(expenses.map(r=>r.date)).size || 1;
+  $("#expAvg").textContent = fmt(total/days);
+  tbody.addEventListener("click", e=>{
+    if(e.target.dataset.dele){
+      expenses = expenses.filter(x=>x.id!==e.target.dataset.dele);
+      store.set("expenses",expenses); renderExpenses(); renderAll();
+    }
+  }, {once:true});
+}
 
-$('#btn-add-com').onclick = ()=>{
-  const title = $('#com-title').value.trim();
-  const amount = Number($('#com-amount').value);
-  let due = parseInt($('#com-due').value||'1',10);
-  if(!amount){ alert('Enter a valid amount'); return; }
-  if(due<1||due>28) due = 1;
-  const d = load();
-  d.commitments.push({id:crypto.randomUUID(), title, amount, due});
-  save(d);
-  $('#com-title').value=''; $('#com-amount').value=''; $('#com-due').value='';
-  document.querySelector('[data-tab="dashboard"]').click();
-  refresh();
+/* ===================== Savings ===================== */
+$("#sStart").value = todayISO(); $("#sEnd").value = todayISO();
+$("#addSaving").onclick = ()=>{
+  const st = new Date($("#sStart").value||todayISO());
+  const en = new Date($("#sEnd").value||todayISO());
+  const months = Math.max(1, (en.getFullYear()-st.getFullYear())*12 + (en.getMonth()-st.getMonth()) + 1);
+  const target = +($("#sTarget").value||0);
+  const monthly = Math.ceil((target/months)*100)/100;
+  const row = {
+    id: crypto.randomUUID(), goal: $("#sGoal").value.trim()||"Untitled",
+    cat: $("#sCat").value, target, months, monthly,
+    start: $("#sStart").value, end: $("#sEnd").value, prog: 0,
+    toCommit: $("#sToCommit").checked
+  };
+  savings.push(row); store.set("savings",savings);
+  if(row.toCommit){
+    commitments.push({
+      id: crypto.randomUUID(),
+      name: `Saving for ${row.goal}`,
+      cat: "Savings / Investments",
+      amt: row.monthly,
+      due: row.end, status:"Pending", notes:"Auto from Savings"
+    });
+    store.set("commitments",commitments);
+  }
+  $("#sGoal").value=""; $("#sTarget").value="";
+  renderSavings(); renderCommitments(); renderAll();
 };
+function renderSavings(){
+  const tbody = $("#saveBody"); tbody.innerHTML="";
+  savings.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.goal}</td><td>${r.cat}</td><td>${fmt(r.target)}</td>
+      <td>${r.months}</td><td>${fmt(r.monthly)}</td>
+      <td>${r.start}</td><td>${r.end}</td>
+      <td><div class="progress" style="width:140px"><i style="width:${r.prog||0}%"></i></div></td>
+      <td><button class="secondary" data-dels="${r.id}">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.addEventListener("click", e=>{
+    if(e.target.dataset.dels){
+      savings = savings.filter(x=>x.id!==e.target.dataset.dels);
+      store.set("savings",savings); renderSavings(); renderAll();
+    }
+  }, {once:true});
+}
 
-$('#btn-add-sav').onclick = ()=>{
-  const title = $('#sav-title').value.trim();
-  const amount = Number($('#sav-amount').value);
-  if(!amount){ alert('Enter a valid amount'); return; }
-  const d = load();
-  d.savings.push({id:crypto.randomUUID(), title, amount, created:new Date().toISOString().slice(0,10)});
-  save(d);
-  $('#sav-title').value=''; $('#sav-amount').value='';
-  document.querySelector('[data-tab="dashboard"]').click();
-  refresh();
+/* ===================== Events ===================== */
+$("#addEvent").onclick = ()=>{
+  const row = {
+    id: crypto.randomUUID(),
+    name: $("#vName").value.trim()||"Untitled",
+    type: $("#vType").value, date: $("#vDate").value||todayISO(),
+    plan: +($("#vPlan").value||0),
+    toCommit: $("#vToCommit").checked
+  };
+  events.push(row); store.set("events",events);
+  if(row.toCommit){
+    commitments.push({
+      id: crypto.randomUUID(), name:`Gift – ${row.name}`, cat:"Gifts & Celebrations",
+      amt: row.plan, due: row.date, status:"Pending", notes:"Auto from Event"
+    });
+    store.set("commitments",commitments);
+  }
+  $("#vName").value=""; $("#vPlan").value="";
+  renderEvents(); renderCommitments(); renderAll();
 };
+function renderEvents(){
+  const tbody = $("#eventBody"); tbody.innerHTML="";
+  const now = new Date();
+  let nextTxt = "—", minDays = Infinity;
+  events.forEach(r=>{
+    const d = new Date(r.date);
+    const left = Math.ceil((d - now)/(1000*60*60*24));
+    let badge = `<span class="badge">—</span>`;
+    if(left<0) badge = `<span class="badge">Past</span>`;
+    else if(left<=3) badge = `<span class="badge bad">3 days</span>`;
+    else if(left<=7) badge = `<span class="badge warn">1 week</span>`;
+    else if(left<=30) badge = `<span class="badge" style="background:#e9f2ff;color:var(--info)">1 month</span>`;
+    if(left>=0 && left<minDays){minDays=left; nextTxt = left+" days";}
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${r.name}</td><td>${r.type}</td><td>${r.date}</td><td>${fmt(r.plan)}</td><td>${badge}</td><td><button class="secondary" data-delevent="${r.id}">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  $("#kpiNextEvent").textContent = nextTxt;
+  tbody.addEventListener("click", e=>{
+    if(e.target.dataset.delevent){
+      events = events.filter(x=>x.id!==e.target.dataset.delevent);
+      store.set("events",events); renderEvents(); renderAll();
+    }
+  }, {once:true});
+}
 
-/* init */
-(() => {
-  // set default date for convenience
-  const today = new Date().toISOString().slice(0,10);
-  const dd = document.getElementById('exp-date'); if(dd) dd.value = today;
-  refresh();
-})();
+/* ===================== Notes ===================== */
+$("#notesTxt").addEventListener("input", e=> store.set("notes", e.target.value));
+
+/* ===================== KPIs & Charts ===================== */
+function totals(){
+  const expTotal = expenses.reduce((a,b)=>a+b.amt,0);
+  const commitTotal = commitments.reduce((a,b)=>a+b.amt,0);
+  const paidCnt = commitments.filter(x=>x.status==="Paid").length;
+  const paidPct = commitments.length? Math.round((paidCnt/commitments.length)*100):0;
+  return {expTotal, commitTotal, paidCnt, paidPct};
+}
+function renderDashboard(){
+  const t = totals();
+  $("#kpiExpenses").textContent = fmt(t.expTotal);
+  $("#kpiPaid").textContent = t.paidPct+"%";
+  $("#kpiPaidLabel").textContent = `${t.paidCnt||0}/${commitments.length} paid`;
+  $("#progressPaid").style.width = t.paidPct+"%";
+  const income = 0; // يمكن لاحقاً إضافة دخل مخطط
+  const balance = income - t.expTotal - t.commitTotal;
+  $("#kpiBalance").textContent = fmt(balance);
+}
+let donut, bar, cchart, schart;
+function drawCharts(){
+  const byCat = {};
+  expenses.forEach(r=> byCat[r.cat]=(byCat[r.cat]||0)+r.amt);
+  const labels = Object.keys(byCat); const data = Object.values(byCat);
+  donut?.destroy();
+  donut = new Chart($("#donutCat"),{type:'doughnut',data:{labels,datasets:[{data}]},options:{plugins:{legend:{position:'bottom'}}}});
+  // weekly bars
+  const weeks=[0,0,0,0,0];
+  expenses.forEach(r=>{
+    const d = new Date(r.date).getDate();
+    const idx = Math.min(4, Math.floor((d-1)/7)); weeks[idx]+=r.amt;
+  });
+  bar?.destroy();
+  bar = new Chart($("#barWeek"),{type:'bar',data:{labels:["W1","W2","W3","W4","W5"],datasets:[{data:weeks}]} ,options:{plugins:{legend:{display:false}}}});
+  // commitments chart
+  const paid = commitments.filter(x=>x.status==="Paid").length;
+  const pend = commitments.length - paid;
+  cchart?.destroy();
+  cchart = new Chart($("#commitChart"),{type:'doughnut',data:{labels:["Paid","Unpaid"],datasets:[{data:[paid,pend]}]},options:{plugins:{legend:{position:'bottom'}}}});
+  // savings target monthly
+  const sMonths = savings.map(s=>s.goal);
+  const sMonthly = savings.map(s=>s.monthly);
+  schart?.destroy();
+  schart = new Chart($("#saveChart"),{type:'bar',data:{labels:sMonths,datasets:[{data:sMonthly}]} ,options:{plugins:{legend:{display:false}}}});
+}
+
+/* ===================== Bootstrap (render) ===================== */
+function renderAll(){ renderCommitments(); renderExpenses(); renderSavings(); renderEvents(); renderDashboard(); if($(".tab.active")?.dataset.tab==="analysis") drawCharts(); }
+renderAll();
+
 </script>
 </body>
 </html>
