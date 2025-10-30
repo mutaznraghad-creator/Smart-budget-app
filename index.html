@@ -1,103 +1,84 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Smart Budget</title>
 
-  <!-- OneSignal Push Notification -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(function() {
-      OneSignal.init({
-        appId: "5dbef29c-1d7a-403d-9399-b2566983cc30",
-        safari_web_id: "",
-        notifyButton: {
-          enable: true,
-          size: 'medium',
-          theme: 'default',
-          position: 'bottom-right',
-          text: {
-            'tip.state.unsubscribed': 'Enable notifications 🔔',
-            'tip.state.subscribed': "You're subscribed 🎉",
-            'tip.state.blocked': "You've blocked notifications 🚫",
-            'message.prenotify': 'Click to enable updates ✨',
-            'message.action.subscribed': "Thanks for subscribing ❤️",
-            'message.action.resubscribed': "You’re subscribed again!",
-            'message.action.unsubscribed': "You turned off notifications",
-            'dialog.main.title': 'Smart Budget Notifications',
-            'dialog.main.button.subscribe': 'SUBSCRIBE',
-            'dialog.main.button.unsubscribe': 'UNSUBSCRIBE'
-          }
-        }
-      });
-    });
-  </script>
-  <!-- End OneSignal -->
-
   <style>
-    :root{
-      --bg:#f6f7f9; --card:#ffffff; --ink:#243748;
-      --brand1:#2c74ff; --brand2:#12b886;
-      --beige:#f2efe8; --soft:#e8eef8;
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --ink: #243447;
+      --brand1: #2c74ff;
+      --brand2: #12b886;
+      --beige: #f2efe8;
+      --soft: #e8eef8;
     }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,sans-serif;
-      background:var(--bg);
-      color:var(--ink);
+    * {
+      box-sizing: border-box;
     }
 
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:20px;
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
     }
 
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:16px 0;
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
     }
 
-    .title{
-      font-weight:800;
-      color:var(--ink);
-      font-size:22px;
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
-    .actions button{
-      background:var(--brand1);
-      color:white;
-      border:none;
-      padding:10px 18px;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
+    .title {
+      font-weight: 800;
+      color: var(--ink);
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .card{
-      background:var(--card);
-      padding:20px;
-      border-radius:20px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.05);
-      margin-top:25px;
+    main {
+      margin-top: 40px;
     }
 
-    .card h2{
-      margin-top:0;
-      color:var(--brand2);
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-align: center;
     }
 
-    .footer{
-      margin-top:40px;
-      text-align:center;
-      color:#888;
-      font-size:13px;
+    h2 {
+      color: #00a67d;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #444;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 0 10px;
+      color: #777;
+      font-size: 0.9rem;
     }
   </style>
 </head>
@@ -105,20 +86,20 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="title">Smart Budget 💰</div>
-      <div class="actions">
-        <button onclick="OneSignal.showSlidedownPrompt()">Enable Notifications 🔔</button>
-      </div>
+      <h1 class="title">Smart Budget 💰</h1>
     </header>
 
-    <div class="card">
-      <h2>Welcome to Smart Budget!</h2>
-      <p>Track your expenses, commitments, and savings in one place. Get reminders for payments and birthdays automatically.</p>
-    </div>
+    <main>
+      <div class="card">
+        <h2>Welcome to Smart Budget!</h2>
+        <p>Track your expenses, commitments, and savings in one place.<br>
+        Get reminders for payments and birthdays automatically (coming soon).</p>
+      </div>
+    </main>
 
-    <div class="footer">
+    <footer>
       © 2025 Smart Budget — All rights reserved.
-    </div>
+    </footer>
   </div>
 </body>
 </html>
