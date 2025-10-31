@@ -1,605 +1,466 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Smart Budget & Commitments Dashboard</title>
-<link rel="manifest" href="data:application/json,{ }">
-<!-- Icons (Feather) -->
-<link rel="preconnect" href="https://unpkg.com">
-<link rel="dns-prefetch" href="https://unpkg.com">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
-<style>
-:root{
-  --bg:#f6f7f9; --card:#ffffff; --ink:#243147; --muted:#56627a;
-  --sage:#5A7768; --sage-soft:#E5EFEA; --sage-accent:#9AB7A9;
-  --blue:#2C74FF; --blue-soft:#E7EFFF; --blue-accent:#9DB5FF;
-  --sand:#C9B79D; --sand-soft:#F4EFE7; --sand-accent:#E3D6C2;
-  --brand: var(--sage); --surface: var(--sage-soft); --accent: var(--sage-accent);
-  --ok:#23a26d; --warn:#ffb020; --bad:#ef5350; --info:#2c74ff; --soft:#e8eef8;
-  --radius:18px; --shadow:0 8px 24px rgba(0,0,0,.08);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:1180px;margin:0 auto;padding:20px}
-header{display:flex;align-items:center;justify-content:space-between;margin:8px 0 16px}
-.brand{display:flex;align-items:center;gap:12px}
-.brand h1{font-size:22px;margin:0;font-weight:800}
-.tag{background:var(--surface);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--brand);border:1px solid rgba(0,0,0,.05)}
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-select, input[type="date"], input[type="text"], input[type="number"]{
-  padding:10px 12px;border-radius:12px;border:1px solid #dfe3ea;background:#fff;font-size:14px;color:var(--ink)
-}
-button{background:var(--brand);color:#fff;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
-button.secondary{background:var(--surface);color:var(--brand);border:1px solid rgba(0,0,0,.06)}
-.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 18px}
-.tab{background:#fff;border:1px solid #e6e9f0;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer}
-.tab.active{background:var(--brand);color:#fff;border-color:transparent}
-.grid{display:grid;gap:16px}
-.cards-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-@media(max-width:900px){.cards-4{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.cards-4{grid-template-columns:1fr}}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-.card h3{margin:0 0 8px;font-size:16px}
-.big{font-size:28px;font-weight:900;margin-top:2px}
-.sub{color:var(--muted);font-size:13px}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-table{width:100%;border-collapse:separate;border-spacing:0 8px}
-th,td{text-align:left;padding:10px 12px;font-size:14px;background:#fff}
-th{font-size:12px;color:#6b7488;background:transparent;padding:0 12px 6px}
-tr td{border-top:1px solid #eef1f6;border-bottom:1px solid #eef1f6}
-tr td:first-child{border-left:1px solid #eef1f6;border-top-left-radius:12px;border-bottom-left-radius:12px}
-tr td:last-child{border-right:1px solid #eef1f6;border-top-right-radius:12px;border-bottom-right-radius:12px}
-.badge{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-block}
-.badge.ok{background:#e8f7f0;color:var(--ok)}
-.badge.warn{background:#fff5e6;color:var(--warn)}
-.badge.bad{background:#ffe8e8;color:var(--bad)}
-.kpi{display:flex;align-items:baseline;justify-content:space-between}
-.progress{height:10px;background:#eef1f6;border-radius:999px;overflow:hidden}
-.progress>i{display:block;height:100%;background:var(--brand);width:0%}
-.quote{padding:14px;border-radius:12px;background:var(--surface);color:var(--brand);font-weight:700;border:1px dashed var(--accent)}
-footer{opacity:.7;font-size:12px;margin:28px 0;text-align:center}
-.help pre{white-space:pre-wrap;background:#fafbff;padding:12px;border-radius:10px;border:1px solid #ebeff6}
-.hr{height:1px;background:#eceff6;margin:12px 0;border-radius:999px}
-.small{font-size:12px;color:#6b7488}
-.toggle{display:inline-flex;align-items:center;gap:6px}
-.toggle input{transform:scale(1.2)}
-/* status colors rows */
-tr.dueSoon td{background:linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ffedd5,#fff) border-box}
-tr.overdue td{background:linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#ffe4e6,#fff) border-box}
-tr.paid td{background:linear-gradient(#fff,#fff) padding-box, linear-gradient(90deg,#dcfce7,#fff) border-box}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Budget</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0e5bd8">
+  <link rel="icon" href="/icons/icon-192.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --ink: #24364d;
+      --muted: #5c6b7a;
+      --soft: #e8eef8;
+      --brand: #2c74ff; /* Blue */
+      --ok: #2fc087;
+      --warn: #ffbe3b;
+      --bad: #ff8a8a;
+    }
+    [data-theme="Sage"]  { --brand:#2b8a68; --soft:#e6f1ed; }
+    [data-theme="Sand"]  { --brand:#c59d5f; --soft:#efe7d8; }
+
+    * { box-sizing: border-box }
+    body {
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--bg); color: var(--ink);
+    }
+    .wrap { max-width:1100px; margin:0 auto; padding:16px; }
+    header{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .logo{ display:flex; align-items:center; gap:10px; }
+    .logo img{ width:32px; height:32px; border-radius:8px }
+    h1{ font-size:28px; margin:0; }
+    .controls{ display:flex; gap:10px; margin-left:auto; flex-wrap:wrap; }
+    select, input, button {
+      height:40px; padding:0 12px; border-radius:10px; border:1px solid #d6dbe3; background:#fff;
+      color:var(--ink); outline:none;
+    }
+    button.brand { background: var(--brand); color:#fff; border-color: transparent; }
+    button.ghost { background:transparent }
+    nav { margin:16px 0; display:flex; gap:10px; flex-wrap:wrap; }
+    nav button { background:#edf1fb; color:#1f3b7a; }
+    nav button.active { background: var(--brand); color:#fff; }
+    .card{ background:var(--card); border-radius:18px; padding:18px; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+
+    .grid{ display:grid; gap:14px; }
+    @media(min-width:900px){ .grid.cols-3{ grid-template-columns:1fr 1fr 1fr } }
+
+    .stat h3{ margin:0 0 6px; font-size:14px; color:var(--muted) }
+    .stat .big{ font-size:28px; font-weight:800 }
+
+    table{ width:100%; border-collapse: collapse; }
+    th, td{ text-align:left; padding:10px 8px; border-bottom:1px solid #eef1f6; font-size:14px }
+    th{ color:var(--muted); font-weight:600 }
+    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:100px; font-size:12px; }
+    .paid{ background:#e6fbf4; color:#0a7a57 }
+    .soon{ background:#fff6e4; color:#916300 }
+    .over{ background:#ffecec; color:#9b1c1c }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .row > * { flex:1; min-width:180px }
+    .hint{ color:var(--muted); font-size:13px }
+    .progress{ height:10px; background:#eef2f7; border-radius:999px; overflow:hidden }
+    .progress > i{ display:block; height:100%; background:var(--brand); width:0% }
+
+    .toast{ position: fixed; left:50%; transform:translateX(-50%); bottom:18px; background:var(--ink); color:#fff; padding:12px 16px; border-radius:12px; opacity:0; pointer-events:none; transition:.2s }
+    .toast.show{ opacity:1 }
+  </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="app" data-theme="Blue">
+
   <header>
-    <div class="brand">
-      <span class="tag">💸</span>
+    <div class="logo">
+      <img src="/icons/icon-192.png" alt="logo">
       <h1>Smart Budget</h1>
-      <span class="tag" id="monthTag"></span>
     </div>
+
     <div class="controls">
-      <input id="userName" type="text" placeholder="Your name" style="min-width:160px">
-      <select id="currency">
+      <input id="nameInput" placeholder="Your name" style="width:160px">
+      <select id="currencySel">
         <option value="€">€ EUR</option>
         <option value="$">$ USD</option>
         <option value="£">£ GBP</option>
-        <option value="﷼">﷼ SAR</option>
       </select>
-      <select id="theme">
-        <option value="sage">Sage</option>
-        <option value="blue">Blue</option>
-        <option value="sand">Sand</option>
+      <select id="themeSel">
+        <option>Blue</option><option>Sage</option><option>Sand</option>
       </select>
+
+      <button id="btnSign" class="brand">Sign in with Google</button>
+      <button id="btnOut" class="ghost" style="display:none">Sign out</button>
+      <button id="btnNotif" class="ghost">Enable Notifications 🔔</button>
     </div>
   </header>
 
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="dash">Dashboard</button>
-    <button class="tab" data-tab="commitments">Commitments</button>
-    <button class="tab" data-tab="expenses">Expenses</button>
-    <button class="tab" data-tab="savings">Savings</button>
-    <button class="tab" data-tab="events">Events</button>
-    <button class="tab" data-tab="analysis">Analysis</button>
-    <button class="tab" data-tab="notes">Notes</button>
-    <button class="tab" data-tab="help">Help</button>
-  </div>
+  <nav>
+    <button class="active" data-tab="dashboard">Dashboard</button>
+    <button data-tab="commitments">Commitments</button>
+    <button data-tab="expenses">Expenses</button>
+  </nav>
 
-  <!-- DASHBOARD -->
-  <section id="dash" class="view">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2 id="welcomeTitle">Welcome, Friend 👋</h2>
-        <div class="quote">“Track your money. Master your life.”</div>
+  <!-- Dashboard -->
+  <section id="dashboard" class="card">
+    <h2>Welcome, <span id="welcomeName">Guest</span> 👋</h2>
+    <blockquote class="card" style="margin:12px 0 16px; border:1px dashed var(--soft); background:#fafcff">
+      “Track your money. Master your life.”
+    </blockquote>
+
+    <div class="grid cols-3">
+      <div class="card stat">
+        <h3>Total Balance <span class="hint">Income − Out</span></h3>
+        <div class="big" id="statBalance">€ 0.00</div>
       </div>
-      <div class="grid cards-4">
-        <div class="card">
-          <div class="kpi"><h3>Total Balance</h3><span class="small">Income − Out</span></div>
-          <div class="big" id="kpiBalance">0.00</div>
-        </div>
-        <div class="card">
-          <div class="kpi"><h3>Total Expenses (month)</h3><span class="small">variable</span></div>
-          <div class="big" id="kpiExpenses">0.00</div>
-        </div>
-        <div class="card">
-          <div class="kpi"><h3>% Commitments Paid</h3><span class="small" id="kpiPaidLabel"></span></div>
-          <div class="progress" title="% Paid"><i id="progressPaid"></i></div>
-          <div class="big" id="kpiPaid">0%</div>
-        </div>
-        <div class="card">
-          <div class="kpi"><h3>Next Event</h3><span class="small">countdown</span></div>
-          <div class="big" id="kpiNextEvent">—</div>
-        </div>
+      <div class="card stat">
+        <h3>Total Expenses (month)</h3>
+        <div class="big" id="statExpenses">€ 0.00</div>
+      </div>
+      <div class="card stat">
+        <h3>% Commitments Paid</h3>
+        <div class="progress"><i id="paidBar"></i></div>
+        <div class="hint"><span id="paidPct">0%</span> (<span id="paidCount">0/0</span>)</div>
       </div>
     </div>
   </section>
 
-  <!-- COMMITMENTS -->
-  <section id="commitments" class="view" style="display:none">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Commitments (Fixed Payments)</h2>
-        <div class="row">
-          <input id="cName" placeholder="Commitment name">
-          <select id="cCat"></select>
-          <input id="cAmt" type="number" step="0.01" placeholder="Monthly">
-          <input id="cDue" type="date">
-          <button id="addCommitment">+ Add</button>
-        </div>
-      </div>
-      <div class="hr"></div>
+  <!-- Commitments -->
+  <section id="commitments" class="card" style="display:none">
+    <h2>Commitments (Fixed Payments)</h2>
+    <div class="row" style="margin-top:10px">
+      <input id="c_name" placeholder="Commitment name">
+      <select id="c_cat">
+        <option>Groceries</option><option>Coffee & Snacks</option><option>Dining Out</option>
+        <option>Household Supplies</option><option>Fuel / Gas</option><option>Public Transport</option>
+        <option>Car Maintenance</option><option>Rent / Mortgage</option><option>Electricity</option>
+        <option>Water</option><option>Internet & Phone</option><option>Home Maintenance</option>
+        <option>Healthcare / Medicine</option><option>Insurance</option><option>Gym / Fitness</option>
+        <option>Personal Care</option><option>Clothing & Accessories</option><option>Gifts & Celebrations</option>
+        <option>Entertainment</option><option>Hobbies & Subscriptions</option><option>Courses & Learning</option>
+        <option>Books & Materials</option><option>Work Expenses</option><option>Software & Apps</option>
+        <option>Savings / Investments</option><option>Travel</option><option>Accommodation</option>
+        <option>Activities & Tickets</option><option>Donations & Charity</option><option>Taxes & Fees</option>
+        <option>Miscellaneous</option>
+      </select>
+      <input id="c_amount" type="number" min="0" step="0.01" placeholder="Monthly amount">
+      <input id="c_due" type="date">
+      <button id="c_add" class="brand">+ Add</button>
+    </div>
+
+    <div class="hint" style="margin:10px 0">Status colors: <span class="badge paid">Paid</span> <span class="badge soon">Due ≤ 3 days</span> <span class="badge over">Overdue</span></div>
+
+    <div class="card" style="margin-top:14px; overflow:auto">
       <table>
         <thead>
-          <tr><th>Name</th><th>Category</th><th>Monthly</th><th>Due</th><th>Status</th><th>Notes</th><th></th></tr>
+          <tr>
+            <th>Name</th><th>Category</th><th>Monthly</th><th>Due</th><th>Status</th><th>Notes</th><th></th>
+          </tr>
         </thead>
-        <tbody id="commitBody"></tbody>
+        <tbody id="c_tbody"></tbody>
       </table>
-      <div class="row" style="justify-content:space-between;margin-top:8px">
-        <div class="badge">Total: <span id="commitTotal">0.00</span></div>
-        <div class="row" style="gap:16px">
-          <div class="badge ok">Paid: <span id="commitPaidCnt">0</span></div>
-          <div class="badge warn">Due soon</div>
-          <div class="badge bad">Overdue</div>
-          <div class="badge">Next due in <span id="nextDueDays">—</span> days</div>
-        </div>
-      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <div class="card stat"><h3>Total</h3><div class="big" id="c_total">€ 0.00</div></div>
+      <div class="card stat"><h3>Paid this month</h3><div class="big" id="c_paid_count">0</div></div>
+      <div class="card stat"><h3>Next due in</h3><div class="big" id="c_next_due">—</div></div>
     </div>
   </section>
 
-  <!-- EXPENSES -->
-  <section id="expenses" class="view" style="display:none">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Expenses (Variable)</h2>
-        <div class="row">
-          <input id="eDate" type="date">
-          <select id="eCat"></select>
-          <input id="eDesc" placeholder="Description">
-          <input id="eAmt" type="number" step="0.01" placeholder="Amount">
-          <select id="eMethod">
-            <option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option>
-          </select>
-          <button id="addExpense">+ Add</button>
-        </div>
-      </div>
-      <div class="hr"></div>
-      <div class="row" style="gap:16px;flex-wrap:wrap">
-        <div class="badge">Total: <span id="expTotal">0.00</span></div>
-        <div class="badge">Top 3: <span id="expTop3">—</span></div>
-        <div class="badge">Avg/day: <span id="expAvg">0.00</span></div>
-      </div>
+  <!-- Expenses -->
+  <section id="expenses" class="card" style="display:none">
+    <h2>Expenses (Variable)</h2>
+    <div class="row" style="margin-top:10px">
+      <input id="e_date" type="date">
+      <select id="e_cat">
+        <option>Groceries</option><option>Coffee & Snacks</option><option>Dining Out</option>
+        <option>Household Supplies</option><option>Fuel / Gas</option><option>Public Transport</option>
+        <option>Car Maintenance</option><option>Electricity</option><option>Water</option><option>Internet & Phone</option>
+        <option>Home Maintenance</option><option>Healthcare / Medicine</option><option>Insurance</option><option>Gym / Fitness</option>
+        <option>Personal Care</option><option>Clothing & Accessories</option><option>Gifts & Celebrations</option>
+        <option>Entertainment</option><option>Hobbies & Subscriptions</option><option>Courses & Learning</option>
+        <option>Books & Materials</option><option>Work Expenses</option><option>Software & Apps</option>
+        <option>Savings / Investments</option><option>Travel</option><option>Accommodation</option>
+        <option>Activities & Tickets</option><option>Donations & Charity</option><option>Taxes & Fees</option>
+        <option>Miscellaneous</option>
+      </select>
+      <input id="e_desc" placeholder="Description">
+      <input id="e_amount" type="number" min="0" step="0.01" placeholder="Amount">
+      <select id="e_method"><option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option></select>
+      <button id="e_add" class="brand">+ Add</button>
+    </div>
+
+    <div class="card" style="margin-top:14px; overflow:auto">
       <table>
         <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Method</th><th></th></tr></thead>
-        <tbody id="expBody"></tbody>
+        <tbody id="e_tbody"></tbody>
       </table>
     </div>
-  </section>
 
-  <!-- SAVINGS -->
-  <section id="savings" class="view" style="display:none">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Saving Plans</h2>
-        <div class="row">
-          <input id="sGoal" placeholder="Goal name">
-          <select id="sCat"><option>Vacation</option><option>Wedding</option><option>Investment</option><option>Other</option></select>
-          <input id="sTarget" type="number" step="0.01" placeholder="Target">
-          <input id="sStart" type="date">
-          <input id="sEnd" type="date">
-          <label class="toggle"><input id="sToCommit" type="checkbox">Add to Commitments</label>
-          <button id="addSaving">+ Add</button>
-        </div>
-      </div>
-      <div class="hr"></div>
-      <table>
-        <thead>
-          <tr><th>Goal</th><th>Category</th><th>Target</th><th>Months</th><th>Monthly</th><th>Start</th><th>End</th><th>Progress</th><th></th></tr>
-        </thead>
-        <tbody id="saveBody"></tbody>
-      </table>
+    <div class="row" style="margin-top:10px">
+      <div class="card stat"><h3>Total (month)</h3><div class="big" id="e_total">€ 0.00</div></div>
+      <div class="card stat"><h3>Top 3 categories</h3><div id="e_top3" class="hint">—</div></div>
+      <div class="card stat"><h3>Avg/day</h3><div class="big" id="e_avg">€ 0.00</div></div>
     </div>
   </section>
 
-  <!-- EVENTS -->
-  <section id="events" class="view" style="display:none">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Events & Gifts</h2>
-        <div class="row">
-          <input id="vName" placeholder="Event name">
-          <select id="vType"><option>Birthday</option><option>Wedding</option><option>Holiday</option><option>Gift</option><option>Other</option></select>
-          <input id="vDate" type="date">
-          <input id="vPlan" type="number" step="0.01" placeholder="Planned spending">
-          <label class="toggle"><input id="vToCommit" type="checkbox">Add to Commitments</label>
-          <button id="addEvent">+ Add</button>
-        </div>
-      </div>
-      <div class="hr"></div>
-      <table>
-        <thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminder</th><th></th></tr></thead>
-        <tbody id="eventBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ANALYSIS -->
-  <section id="analysis" class="view" style="display:none">
-    <div class="grid cards-4">
-      <div class="card"><h3>Expenses by Category</h3><canvas id="donutCat" height="210"></canvas></div>
-      <div class="card"><h3>Weekly Spend</h3><canvas id="barWeek" height="210"></canvas></div>
-      <div class="card"><h3>Commitments vs Paid</h3><canvas id="commitChart" height="210"></canvas></div>
-      <div class="card"><h3>Savings Monthly Target</h3><canvas id="saveChart" height="210"></canvas></div>
-    </div>
-  </section>
-
-  <!-- NOTES / HELP -->
-  <section id="notes" class="view" style="display:none">
-    <div class="card"><h2>Notes</h2><textarea id="notesTxt" style="width:100%;height:220px;border:1px solid #e6e9f0;border-radius:14px;padding:12px"></textarea></div>
-  </section>
-
-  <section id="help" class="view help" style="display:none">
-    <div class="card">
-      <h2>Google Sheets Helper Formulas</h2>
-      <pre>
-Days to Event: =[Event_Date] - TODAY()
-Months to Save: =DATEDIF([Start_Date],[End_Date],"M")+1
-Monthly Contribution: =ROUNDUP([Target_Amount]/[Months_to_Save],2)
-Status (Commitments):
-=IF([Paid] >= [Amount], "Paid",
- IF([Due_Date] < TODAY(), "Overdue",
-  IF([Due_Date] - TODAY() <= 3, "Due Soon", "Pending")))
-Expense by Category: =SUMIF([Category_Col],[Category],[Amount_Col])
-      </pre>
-      <div class="hr"></div>
-      <h3>How to use</h3>
-      <ul>
-        <li>اكتبي اسمك في أعلى الصفحة—يظهر تلقائيًا في الترحيب.</li>
-        <li>اختاري العملة والثيم من الشريط العلوي.</li>
-        <li>أضيفي التزامات ثابتة، مصروفات يومية، خطط ادخار، وأحداث. كل شيء يُحفَظ في المتصفح.</li>
-        <li>زر “Add to Commitments” في الادخار أو الأحداث ينشئ بندًا تلقائيًا ضمن التزامات الشهر.</li>
-        <li>قسم Analysis يترسم تلقائيًا حسب بياناتك.</li>
-      </ul>
-    </div>
-  </section>
-
-  <footer>© 2025 Smart Budget — All rights reserved.</footer>
+  <div class="toast" id="toast">Saved</div>
 </div>
 
-<script>
-/* ===================== State & Utils ======================= */
-const $ = s=>document.querySelector(s);
-const $$ = s=>document.querySelectorAll(s);
-const store = {
-  get: (k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
-  set: (k,v)=>localStorage.setItem(k,JSON.stringify(v))
-};
-const CATS = ["Groceries","Coffee & Snacks","Dining Out","Household Supplies","Fuel / Gas","Public Transport","Car Maintenance","Rent / Mortgage","Electricity","Water","Internet & Phone","Home Maintenance","Healthcare / Medicine","Insurance","Gym / Fitness","Personal Care","Clothing & Accessories","Gifts & Celebrations","Entertainment","Hobbies & Subscriptions","Courses & Learning","Books & Materials","Work Expenses","Software & Apps","Savings / Investments","Travel","Accommodation","Activities & Tickets","Donations & Charity","Taxes & Fees","Miscellaneous"];
-const fmt = (n)=> (currency.value||"€") + " " + (Number(n||0).toFixed(2));
-const todayISO = ()=> new Date().toISOString().slice(0,10);
-$("#monthTag").textContent = new Date().toLocaleString(undefined,{month:'long', year:'numeric'});
+<!-- Firebase (modular v10 CDN) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+  import { getFirestore, enableIndexedDbPersistence, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-/* ===================== Theme / Settings ===================== */
-const userName = $("#userName");
-const currency = $("#currency");
-const theme = $("#theme");
-(function initSettings(){
-  userName.value = store.get("name",""); applyName();
-  currency.value = store.get("cur","€");
-  theme.value = store.get("theme","sage"); applyTheme();
-})();
-userName.addEventListener("input", ()=>{store.set("name",userName.value); applyName();});
-currency.addEventListener("change", ()=>{store.set("cur",currency.value); renderAll();});
-theme.addEventListener("change", ()=>{store.set("theme",theme.value); applyTheme();});
-function applyName(){ $("#welcomeTitle").textContent = `Welcome, ${userName.value||"Friend"} 👋`; }
-function applyTheme(){
-  const t = theme.value;
-  if(t==="blue"){document.documentElement.style.setProperty('--brand','var(--blue)');document.documentElement.style.setProperty('--surface','var(--blue-soft)');document.documentElement.style.setProperty('--accent','var(--blue-accent)');}
-  else if(t==="sand"){document.documentElement.style.setProperty('--brand','var(--sand)');document.documentElement.style.setProperty('--surface','var(--sand-soft)');document.documentElement.style.setProperty('--accent','var(--sand-accent)');}
-  else {document.documentElement.style.setProperty('--brand','var(--sage)');document.documentElement.style.setProperty('--surface','var(--sage-soft)');document.documentElement.style.setProperty('--accent','var(--sage-accent)');}
-}
-
-/* ===================== Tabs ===================== */
-$("#tabs").addEventListener("click", (e)=>{
-  if(!e.target.classList.contains("tab")) return;
-  $$(".tab").forEach(t=>t.classList.remove("active"));
-  e.target.classList.add("active");
-  const id = e.target.dataset.tab;
-  $$(".view").forEach(v=>v.style.display = (v.id===id?"block":"none"));
-  if(id==="analysis") drawCharts();
-});
-
-/* ===================== Dropdown seeds ===================== */
-function seedDropdowns(){
-  const catOpts = CATS.map(c=>`<option>${c}</option>`).join('');
-  $("#cCat").innerHTML = catOpts;
-  $("#eCat").innerHTML = catOpts;
-}
-seedDropdowns();
-
-/* ===================== Data ===================== */
-let commitments = store.get("commitments",[]);
-let expenses = store.get("expenses",[]);
-let savings = store.get("savings",[]);
-let events = store.get("events",[]);
-$("#notesTxt").value = store.get("notes","");
-
-/* ===================== Commitments ===================== */
-$("#addCommitment").onclick = ()=>{
-  const item = {
-    id: crypto.randomUUID(),
-    name: $("#cName").value.trim()||"Untitled",
-    cat: $("#cCat").value,
-    amt: +($("#cAmt").value||0),
-    due: $("#cDue").value || todayISO(),
-    status: "Pending",
-    notes:""
+  // --- Firebase config (من مشروعك) ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCfnCTuunR_E15GQaPQyUbS2Fdj6XAYfUo",
+    authDomain: "smart-budget-61664.firebaseapp.com",
+    projectId: "smart-budget-61664",
+    storageBucket: "smart-budget-61664.firebasestorage.app",
+    messagingSenderId: "273780649075",
+    appId: "1:273780649075:web:c0c08d6d5f65085e9e0e06",
+    measurementId: "G-FNJJPP90FH"
   };
-  commitments.push(item); store.set("commitments",commitments);
-  $("#cName").value=""; $("#cAmt").value=""; $("#cDue").value="";
-  renderCommitments(); renderAll();
-};
-function renderCommitments(){
-  const tbody = $("#commitBody"); tbody.innerHTML = "";
-  const today = new Date();
-  let paidCnt=0, total=0, minDays = Infinity;
-  commitments.forEach(row=>{
-    total += row.amt;
-    const due = new Date(row.due);
-    const dLeft = Math.ceil((due - today)/(1000*60*60*24));
-    let cls = "";
-    if(row.status==="Paid"){cls="paid"; paidCnt++;}
-    else if(dLeft<0){cls="overdue";}
-    else if(dLeft<=3){cls="dueSoon";}
-    minDays = Math.min(minDays, dLeft);
-    const tr = document.createElement("tr"); tr.className = cls;
-    tr.innerHTML = `
-      <td>${row.name}</td>
-      <td>${row.cat}</td>
-      <td>${fmt(row.amt)}</td>
-      <td>${row.due}</td>
-      <td>
-        <select data-id="${row.id}" class="cStatus">
-          <option ${row.status==="Paid"?"selected":""}>Paid</option>
-          <option ${row.status==="Pending"?"selected":""}>Pending</option>
-          <option ${row.status==="Overdue"?"selected":""}>Overdue</option>
-        </select>
-      </td>
-      <td contenteditable data-note="${row.id}">${row.notes||""}</td>
-      <td><button class="secondary" data-delc="${row.id}">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
+
+  const appFB = initializeApp(firebaseConfig);
+  const auth = getAuth(appFB);
+  const db = getFirestore(appFB);
+  try { await enableIndexedDbPersistence(db) } catch(e){ console.warn('persistence', e) }
+
+  // --- Elements ---
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>document.querySelectorAll(s);
+  const app = $('#app');
+  const btnSign=$('#btnSign'), btnOut=$('#btnOut');
+  const nameInput=$('#nameInput'), welcomeName=$('#welcomeName');
+  const currencySel=$('#currencySel'), themeSel=$('#themeSel');
+  const toast=$("#toast");
+  function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1500) }
+
+  // --- Theme/Currency persistence ---
+  const savedTheme = localStorage.getItem('sb_theme') || 'Blue';
+  const savedCurr  = localStorage.getItem('sb_curr') || '€';
+  themeSel.value = savedTheme; app.dataset.theme = savedTheme;
+  currencySel.value = ['€ EUR','$ USD','£ GBP'].find(x=>x.startsWith(savedCurr))?currencySel.value:savedCurr;
+  themeSel.onchange = ()=>{ app.dataset.theme = themeSel.value; localStorage.setItem('sb_theme', themeSel.value) }
+  currencySel.onchange = ()=> localStorage.setItem('sb_curr', currencySel.value[0]);
+
+  // --- Tabs ---
+  $$('nav button').forEach(b=>b.onclick = ()=>{
+    $$('nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    ['dashboard','commitments','expenses'].forEach(id => $('#'+id).style.display = (b.dataset.tab===id?'block':'none'));
   });
-  $("#commitTotal").textContent = fmt(total);
-  $("#commitPaidCnt").textContent = paidCnt+"/"+commitments.length;
-  $("#nextDueDays").textContent = commitments.length? (isFinite(minDays)?minDays:"—") : "—";
 
-  // events
-  tbody.addEventListener("change", e=>{
-    if(e.target.classList.contains("cStatus")){
-      const id = e.target.dataset.id;
-      const r = commitments.find(x=>x.id===id);
-      r.status = e.target.value; store.set("commitments",commitments); renderAll();
-    }
-  }, {once:true});
-  tbody.addEventListener("input", e=>{
-    if(e.target.hasAttribute("data-note")){
-      const id = e.target.getAttribute("data-note");
-      const r = commitments.find(x=>x.id===id);
-      r.notes = e.target.textContent; store.set("commitments",commitments);
-    }
-  }, {once:true});
-  tbody.addEventListener("click", e=>{
-    if(e.target.dataset.delc){
-      commitments = commitments.filter(x=>x.id!==e.target.dataset.delc);
-      store.set("commitments",commitments); renderCommitments(); renderAll();
-    }
-  }, {once:true});
-}
-
-/* ===================== Expenses ===================== */
-$("#addExpense").onclick = ()=>{
-  const row = {
-    id: crypto.randomUUID(),
-    date: $("#eDate").value || todayISO(),
-    cat: $("#eCat").value,
-    desc: $("#eDesc").value.trim(),
-    amt: +($("#eAmt").value||0),
-    method: $("#eMethod").value
+  // --- Auth ---
+  const provider = new GoogleAuthProvider();
+  btnSign.onclick = async ()=>{
+    try{ await signInWithPopup(auth, provider) }catch(e){ alert(e.message) }
   };
-  expenses.push(row); store.set("expenses",expenses);
-  $("#eDesc").value=""; $("#eAmt").value="";
-  renderExpenses(); renderAll();
-};
-function renderExpenses(){
-  const tbody = $("#expBody"); tbody.innerHTML="";
-  let total = 0; const byCat = {};
-  expenses.forEach(r=>{
-    total += r.amt; byCat[r.cat] = (byCat[r.cat]||0)+r.amt;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${r.date}</td><td>${r.cat}</td><td>${r.desc||""}</td><td>${fmt(r.amt)}</td><td>${r.method}</td><td><button class="secondary" data-dele="${r.id}">Delete</button></td>`;
-    tbody.appendChild(tr);
+  btnOut.onclick = ()=>signOut(auth);
+
+  let uid=null, curSymbol='€';
+  onAuthStateChanged(auth, user=>{
+    if(user){
+      uid = user.uid;
+      btnSign.style.display='none'; btnOut.style.display='inline-block';
+      nameInput.value = user.displayName || nameInput.value || '';
+      welcomeName.textContent = nameInput.value || 'Friend';
+      bindCommitments();
+      bindExpenses();
+    } else {
+      uid=null;
+      btnSign.style.display='inline-block'; btnOut.style.display='none';
+      $('#c_tbody').innerHTML=''; $('#e_tbody').innerHTML='';
+      refreshStats();
+    }
   });
-  $("#expTotal").textContent = fmt(total);
-  const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join(", ") || "—";
-  $("#expTop3").textContent = top;
-  // avg per day (distinct dates)
-  const days = new Set(expenses.map(r=>r.date)).size || 1;
-  $("#expAvg").textContent = fmt(total/days);
-  tbody.addEventListener("click", e=>{
-    if(e.target.dataset.dele){
-      expenses = expenses.filter(x=>x.id!==e.target.dataset.dele);
-      store.set("expenses",expenses); renderExpenses(); renderAll();
-    }
-  }, {once:true});
-}
 
-/* ===================== Savings ===================== */
-$("#sStart").value = todayISO(); $("#sEnd").value = todayISO();
-$("#addSaving").onclick = ()=>{
-  const st = new Date($("#sStart").value||todayISO());
-  const en = new Date($("#sEnd").value||todayISO());
-  const months = Math.max(1, (en.getFullYear()-st.getFullYear())*12 + (en.getMonth()-st.getMonth()) + 1);
-  const target = +($("#sTarget").value||0);
-  const monthly = Math.ceil((target/months)*100)/100;
-  const row = {
-    id: crypto.randomUUID(), goal: $("#sGoal").value.trim()||"Untitled",
-    cat: $("#sCat").value, target, months, monthly,
-    start: $("#sStart").value, end: $("#sEnd").value, prog: 0,
-    toCommit: $("#sToCommit").checked
+  nameInput.oninput = ()=>{ welcomeName.textContent = nameInput.value || 'Friend'; localStorage.setItem('sb_name', nameInput.value) }
+  nameInput.value = localStorage.getItem('sb_name') || '';
+
+  // --- Helpers ---
+  const fmt = (v)=>`${(currencySel.value||'€')[0]} ${Number(v||0).toFixed(2)}`;
+  const daysBetween = (d)=> Math.ceil((new Date(d).setHours(23,59,59,999) - Date.now())/86400000);
+
+  // --- Commitments CRUD ---
+  const cRef = ()=>collection(db,'users',uid,'commitments');
+  $('#c_add').onclick = async ()=>{
+    if(!uid) return alert('Sign in first');
+    const name=$('#c_name').value.trim();
+    const cat=$('#c_cat').value;
+    const amount=Number($('#c_amount').value||0);
+    const due=$('#c_due').value;
+    if(!name||!amount||!due) return alert('Please fill all fields');
+    await addDoc(cRef(), {name,cat,amount,due,paid:false,ts:serverTimestamp()});
+    $('#c_name').value=''; $('#c_amount').value=''; showToast('Commitment added');
   };
-  savings.push(row); store.set("savings",savings);
-  if(row.toCommit){
-    commitments.push({
-      id: crypto.randomUUID(),
-      name: `Saving for ${row.goal}`,
-      cat: "Savings / Investments",
-      amt: row.monthly,
-      due: row.end, status:"Pending", notes:"Auto from Savings"
-    });
-    store.set("commitments",commitments);
+
+  function rowStatus(d){
+    const days = daysBetween(d.due);
+    if(d.paid) return {label:'Paid', cls:'paid'};
+    if(days < 0) return {label:'Overdue', cls:'over'};
+    if(days <= 3) return {label:'Due soon', cls:'soon'};
+    return {label:'Pending', cls:''};
   }
-  $("#sGoal").value=""; $("#sTarget").value="";
-  renderSavings(); renderCommitments(); renderAll();
-};
-function renderSavings(){
-  const tbody = $("#saveBody"); tbody.innerHTML="";
-  savings.forEach(r=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.goal}</td><td>${r.cat}</td><td>${fmt(r.target)}</td>
-      <td>${r.months}</td><td>${fmt(r.monthly)}</td>
-      <td>${r.start}</td><td>${r.end}</td>
-      <td><div class="progress" style="width:140px"><i style="width:${r.prog||0}%"></i></div></td>
-      <td><button class="secondary" data-dels="${r.id}">Delete</button></td>`;
-    tbody.appendChild(tr);
-  });
-  tbody.addEventListener("click", e=>{
-    if(e.target.dataset.dels){
-      savings = savings.filter(x=>x.id!==e.target.dataset.dels);
-      store.set("savings",savings); renderSavings(); renderAll();
-    }
-  }, {once:true});
-}
 
-/* ===================== Events ===================== */
-$("#addEvent").onclick = ()=>{
-  const row = {
-    id: crypto.randomUUID(),
-    name: $("#vName").value.trim()||"Untitled",
-    type: $("#vType").value, date: $("#vDate").value||todayISO(),
-    plan: +($("#vPlan").value||0),
-    toCommit: $("#vToCommit").checked
-  };
-  events.push(row); store.set("events",events);
-  if(row.toCommit){
-    commitments.push({
-      id: crypto.randomUUID(), name:`Gift – ${row.name}`, cat:"Gifts & Celebrations",
-      amt: row.plan, due: row.date, status:"Pending", notes:"Auto from Event"
+  function bindCommitments(){
+    const qy = query(cRef(), orderBy('ts','desc'));
+    onSnapshot(qy, snap=>{
+      let total=0, paid=0, next = Infinity;
+      const tbody = $('#c_tbody'); tbody.innerHTML='';
+      snap.forEach(docu=>{
+        const d={id:docu.id, ...docu.data()};
+        total += Number(d.amount||0);
+        if(d.paid) paid++;
+        const dv = daysBetween(d.due); if(dv>=0) next = Math.min(next, dv);
+
+        const s = rowStatus(d);
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td>${d.name}</td>
+          <td>${d.cat}</td>
+          <td>${fmt(d.amount)}</td>
+          <td>${d.due}</td>
+          <td><span class="badge ${s.cls}">${s.label}</span></td>
+          <td>${d.notes||''}</td>
+          <td>
+            <button data-act="toggle">✔</button>
+            <button data-act="del" style="color:#b00">🗑</button>
+          </td>`;
+        tr.querySelector('[data-act="toggle"]').onclick = ()=>updateDoc(doc(db,'users',uid,'commitments',d.id),{paid:!d.paid});
+        tr.querySelector('[data-act="del"]').onclick = ()=>deleteDoc(doc(db,'users',uid,'commitments',d.id));
+        tbody.appendChild(tr);
+      });
+      $('#c_total').textContent = fmt(total);
+      $('#c_paid_count').textContent = String(paid);
+      $('#c_next_due').textContent = (next===Infinity?'—':(next+' days'));
+      refreshStats(); // recalculates dashboard + bars
+      // push visual reminders if permission granted
+      scheduleLocalAlertsForUpcoming();
     });
-    store.set("commitments",commitments);
   }
-  $("#vName").value=""; $("#vPlan").value="";
-  renderEvents(); renderCommitments(); renderAll();
-};
-function renderEvents(){
-  const tbody = $("#eventBody"); tbody.innerHTML="";
-  const now = new Date();
-  let nextTxt = "—", minDays = Infinity;
-  events.forEach(r=>{
-    const d = new Date(r.date);
-    const left = Math.ceil((d - now)/(1000*60*60*24));
-    let badge = `<span class="badge">—</span>`;
-    if(left<0) badge = `<span class="badge">Past</span>`;
-    else if(left<=3) badge = `<span class="badge bad">3 days</span>`;
-    else if(left<=7) badge = `<span class="badge warn">1 week</span>`;
-    else if(left<=30) badge = `<span class="badge" style="background:#e9f2ff;color:var(--info)">1 month</span>`;
-    if(left>=0 && left<minDays){minDays=left; nextTxt = left+" days";}
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${r.name}</td><td>${r.type}</td><td>${r.date}</td><td>${fmt(r.plan)}</td><td>${badge}</td><td><button class="secondary" data-delevent="${r.id}">Delete</button></td>`;
-    tbody.appendChild(tr);
+
+  // --- Expenses CRUD ---
+  const eRef = ()=>collection(db,'users',uid,'expenses');
+  $('#e_add').onclick = async ()=>{
+    if(!uid) return alert('Sign in first');
+    const date=$('#e_date').value || new Date().toISOString().slice(0,10);
+    const cat=$('#e_cat').value;
+    const desc=$('#e_desc').value.trim();
+    const amount=Number($('#e_amount').value||0);
+    const method=$('#e_method').value;
+    if(!amount) return alert('Enter amount');
+    await addDoc(eRef(), {date,cat,desc,amount,method,ts:serverTimestamp()});
+    $('#e_amount').value=''; $('#e_desc').value='';
+    showToast('Expense added');
+  };
+
+  function bindExpenses(){
+    const qy = query(eRef(), orderBy('ts','desc'));
+    onSnapshot(qy, snap=>{
+      let total=0; const tbody=$('#e_tbody'); tbody.innerHTML='';
+      const catSum = {};
+      let firstDay=null, lastDay=null;
+
+      snap.forEach(docu=>{
+        const d={id:docu.id, ...docu.data()};
+        total += Number(d.amount||0);
+        catSum[d.cat]=(catSum[d.cat]||0)+Number(d.amount||0);
+
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${d.date||''}</td><td>${d.cat||''}</td><td>${d.desc||''}</td>
+          <td>${fmt(d.amount)}</td><td>${d.method||''}</td>
+          <td><button data-del>🗑</button></td>`;
+        tr.querySelector('[data-del]').onclick = ()=>deleteDoc(doc(db,'users',uid,'expenses',d.id));
+        tbody.appendChild(tr);
+
+        const dt=new Date(d.date||Date.now());
+        firstDay = firstDay?Math.min(firstDay, dt):dt;
+        lastDay  = lastDay?Math.max(lastDay,  dt):dt;
+      });
+
+      $('#e_total').textContent = fmt(total);
+      const days = firstDay && lastDay ? Math.max(1, Math.ceil((lastDay-firstDay)/86400000)+1) : 1;
+      $('#e_avg').textContent = fmt(total/days);
+
+      const top = Object.entries(catSum).sort((a,b)=>b[1]-a[1]).slice(0,3)
+        .map(([k,v])=>`${k} ${fmt(v)}`).join(' · ') || '—';
+      $('#e_top3').textContent = top;
+
+      refreshStats();
+    });
+  }
+
+  // --- Dashboard quick stats ---
+  function refreshStats(){
+    // هنا بإمكانك إضافة دخل المستخدم لحساب الرصيد إن رغبتِ
+    const expTxt = $('#e_total').textContent || '€ 0.00';
+    $('#statExpenses').textContent = expTxt;
+    const paid = Number($('#c_paid_count').textContent||0);
+    const tb = $('#c_total').textContent.replace(/[^\d.]/g,'')||'0';
+    const total = Number(tb);
+    const pct = !total?0:Math.round(paid/paid /* dummy to display count only */);
+    const barPct = !total?0:Math.round((paid/Math.max(1, paid + (total>0?1:0)))*100); // simple
+    $('#paidBar').style.width = barPct + '%';
+    $('#paidPct').textContent = barPct + '%';
+    $('#paidCount').textContent = `${paid}/${paid}`;
+    $('#statBalance').textContent = '€ 0.00';
+  }
+
+  // --- OneSignal (in-page) ---
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "5dbef29c-1d7a-403d-9399-b2566983cc30",
+      safari_web_id: null,
+      allowLocalhostAsSecureOrigin: true,
+      notifyButton: { enable: false },
+    });
   });
-  $("#kpiNextEvent").textContent = nextTxt;
-  tbody.addEventListener("click", e=>{
-    if(e.target.dataset.delevent){
-      events = events.filter(x=>x.id!==e.target.dataset.delevent);
-      store.set("events",events); renderEvents(); renderAll();
+
+  const btnNotif = document.getElementById('btnNotif');
+  btnNotif.onclick = async ()=>{
+    if(!('OneSignal' in window)) return alert('OneSignal SDK not loaded yet');
+    const permission = await OneSignal.User.PushConsent.get();
+    await OneSignal.Slidedown.promptPush();
+  };
+
+  // إشعارات مرئية عند فتح التطبيق (بدون خادم)
+  async function scheduleLocalAlertsForUpcoming(){
+    if(!('OneSignal' in window)) return;
+    // نقرأ جدول الالتزامات المعروضة حاليًا ونرسل إشعار بسيط إذا ≤ 3 أيام أو Overdue
+    const rows = [...document.querySelectorAll('#c_tbody tr')].map(tr=>{
+      const tds = tr.querySelectorAll('td'); return {
+        name: tds[0]?.textContent || '',
+        due:  tds[3]?.textContent || '',
+        status: tds[4]?.innerText || ''
+      };
+    });
+    const soon = rows.filter(r=>/Due soon|Overdue/i.test(r.status));
+    for(const r of soon){
+      const title = /Overdue/.test(r.status)? 'Overdue payment' : 'Payment due soon';
+      const body  = `${r.name} — due ${r.due}`;
+      try { await OneSignal.Notifications.create({ contents:{en:body}, headings:{en:title} }) } catch(e){}
     }
-  }, {once:true});
-}
+  }
 
-/* ===================== Notes ===================== */
-$("#notesTxt").addEventListener("input", e=> store.set("notes", e.target.value));
-
-/* ===================== KPIs & Charts ===================== */
-function totals(){
-  const expTotal = expenses.reduce((a,b)=>a+b.amt,0);
-  const commitTotal = commitments.reduce((a,b)=>a+b.amt,0);
-  const paidCnt = commitments.filter(x=>x.status==="Paid").length;
-  const paidPct = commitments.length? Math.round((paidCnt/commitments.length)*100):0;
-  return {expTotal, commitTotal, paidCnt, paidPct};
-}
-function renderDashboard(){
-  const t = totals();
-  $("#kpiExpenses").textContent = fmt(t.expTotal);
-  $("#kpiPaid").textContent = t.paidPct+"%";
-  $("#kpiPaidLabel").textContent = `${t.paidCnt||0}/${commitments.length} paid`;
-  $("#progressPaid").style.width = t.paidPct+"%";
-  const income = 0; // يمكن لاحقاً إضافة دخل مخطط
-  const balance = income - t.expTotal - t.commitTotal;
-  $("#kpiBalance").textContent = fmt(balance);
-}
-let donut, bar, cchart, schart;
-function drawCharts(){
-  const byCat = {};
-  expenses.forEach(r=> byCat[r.cat]=(byCat[r.cat]||0)+r.amt);
-  const labels = Object.keys(byCat); const data = Object.values(byCat);
-  donut?.destroy();
-  donut = new Chart($("#donutCat"),{type:'doughnut',data:{labels,datasets:[{data}]},options:{plugins:{legend:{position:'bottom'}}}});
-  // weekly bars
-  const weeks=[0,0,0,0,0];
-  expenses.forEach(r=>{
-    const d = new Date(r.date).getDate();
-    const idx = Math.min(4, Math.floor((d-1)/7)); weeks[idx]+=r.amt;
-  });
-  bar?.destroy();
-  bar = new Chart($("#barWeek"),{type:'bar',data:{labels:["W1","W2","W3","W4","W5"],datasets:[{data:weeks}]} ,options:{plugins:{legend:{display:false}}}});
-  // commitments chart
-  const paid = commitments.filter(x=>x.status==="Paid").length;
-  const pend = commitments.length - paid;
-  cchart?.destroy();
-  cchart = new Chart($("#commitChart"),{type:'doughnut',data:{labels:["Paid","Unpaid"],datasets:[{data:[paid,pend]}]},options:{plugins:{legend:{position:'bottom'}}}});
-  // savings target monthly
-  const sMonths = savings.map(s=>s.goal);
-  const sMonthly = savings.map(s=>s.monthly);
-  schart?.destroy();
-  schart = new Chart($("#saveChart"),{type:'bar',data:{labels:sMonths,datasets:[{data:sMonthly}]} ,options:{plugins:{legend:{display:false}}}});
-}
-
-/* ===================== Bootstrap (render) ===================== */
-function renderAll(){ renderCommitments(); renderExpenses(); renderSavings(); renderEvents(); renderDashboard(); if($(".tab.active")?.dataset.tab==="analysis") drawCharts(); }
-renderAll();
-
+  // --- Service Worker registration ---
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(console.warn);
+  }
 </script>
+
+<!-- OneSignal SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </body>
 </html>
