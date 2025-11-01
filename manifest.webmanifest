@@ -1,21 +1,19 @@
 {
   "name": "Smart Budget",
   "short_name": "Smart Budget",
-  "description": "Track expenses, commitments, savings, events & reminders.",
-  "start_url": "/?source=pwa",
+  "description": "Track budget, expenses, commitments, savings, events & reminders.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0f2940",
+  "background_color": "#0f1f39",
+  "theme_color": "#0f1f39",
   "icons": [
-    { "src": "/icon-16.png",   "sizes": "16x16",   "type": "image/png", "purpose": "any" },
-    { "src": "/icon-32.png",   "sizes": "32x32",   "type": "image/png", "purpose": "any" },
-    { "src": "/icon-64.png",   "sizes": "64x64",   "type": "image/png", "purpose": "any" },
-    { "src": "/icon-128.png",  "sizes": "128x128", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-180.png",  "sizes": "180x180", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icon-256.png",  "sizes": "256x256", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icon-1024.png", "sizes": "1024x1024","type": "image/png", "purpose": "any" }
+    { "src": "/icons/icon-16.png",   "sizes": "16x16",   "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-32.png",   "sizes": "32x32",   "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-64.png",   "sizes": "64x64",   "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-128.png",  "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-256.png",  "sizes": "256x256", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
