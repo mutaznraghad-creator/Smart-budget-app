@@ -1,466 +1,774 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Smart Budget</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#0e5bd8">
-  <link rel="icon" href="/icons/icon-192.png">
+  <!-- PWA Manifest (يتولد داخل الصفحة ويُسجَّل آليًا) -->
+  <link id="manifestLink" rel="manifest">
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0e2a44"/>
+
+  <!-- OneSignal SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+  <!-- Firebase (CDN) -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <style>
-    :root {
-      --bg: #f6f7f9;
-      --card: #ffffff;
-      --ink: #24364d;
-      --muted: #5c6b7a;
-      --soft: #e8eef8;
-      --brand: #2c74ff; /* Blue */
-      --ok: #2fc087;
-      --warn: #ffbe3b;
-      --bad: #ff8a8a;
+    :root{
+      --bg:#f6f7f9;--card:#fff;--ink:#24364a;--muted:#6c7a89;
+      --brand:#2c74ff;--sand:#e9e2d3;--sage:#cfe1d5;--blue:#d9e6ff;
+      --ok:#1bbf74;--warn:#ffb200;--bad:#ff6b6b;--soft:#e9eef6;
+      --shadow:0 10px 26px rgba(25,42,70,.07);
     }
-    [data-theme="Sage"]  { --brand:#2b8a68; --soft:#e6f1ed; }
-    [data-theme="Sand"]  { --brand:#c59d5f; --soft:#efe7d8; }
-
-    * { box-sizing: border-box }
-    body {
-      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: var(--bg); color: var(--ink);
+    [data-theme="dark"]{
+      --bg:#0f1720;--card:#111b27;--ink:#f5f7fb;--muted:#9fb0c2;
+      --brand:#5ea1ff;--sand:#3b3a31;--sage:#2d3a33;--blue:#21314a;
+      --soft:#1b2633;--shadow:0 10px 26px rgba(0,0,0,.35);
     }
-    .wrap { max-width:1100px; margin:0 auto; padding:16px; }
-    header{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .logo{ display:flex; align-items:center; gap:10px; }
-    .logo img{ width:32px; height:32px; border-radius:8px }
-    h1{ font-size:28px; margin:0; }
-    .controls{ display:flex; gap:10px; margin-left:auto; flex-wrap:wrap; }
-    select, input, button {
-      height:40px; padding:0 12px; border-radius:10px; border:1px solid #d6dbe3; background:#fff;
-      color:var(--ink); outline:none;
-    }
-    button.brand { background: var(--brand); color:#fff; border-color: transparent; }
-    button.ghost { background:transparent }
-    nav { margin:16px 0; display:flex; gap:10px; flex-wrap:wrap; }
-    nav button { background:#edf1fb; color:#1f3b7a; }
-    nav button.active { background: var(--brand); color:#fff; }
-    .card{ background:var(--card); border-radius:18px; padding:18px; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
-
-    .grid{ display:grid; gap:14px; }
-    @media(min-width:900px){ .grid.cols-3{ grid-template-columns:1fr 1fr 1fr } }
-
-    .stat h3{ margin:0 0 6px; font-size:14px; color:var(--muted) }
-    .stat .big{ font-size:28px; font-weight:800 }
-
-    table{ width:100%; border-collapse: collapse; }
-    th, td{ text-align:left; padding:10px 8px; border-bottom:1px solid #eef1f6; font-size:14px }
-    th{ color:var(--muted); font-weight:600 }
-    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:100px; font-size:12px; }
-    .paid{ background:#e6fbf4; color:#0a7a57 }
-    .soon{ background:#fff6e4; color:#916300 }
-    .over{ background:#ffecec; color:#9b1c1c }
-
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
-    .row > * { flex:1; min-width:180px }
-    .hint{ color:var(--muted); font-size:13px }
-    .progress{ height:10px; background:#eef2f7; border-radius:999px; overflow:hidden }
-    .progress > i{ display:block; height:100%; background:var(--brand); width:0% }
-
-    .toast{ position: fixed; left:50%; transform:translateX(-50%); bottom:18px; background:var(--ink); color:#fff; padding:12px 16px; border-radius:12px; opacity:0; pointer-events:none; transition:.2s }
-    .toast.show{ opacity:1 }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;
+      background:var(--bg);color:var(--ink)}
+    .wrap{max-width:1100px;padding:18px;margin:0 auto}
+    header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-badge{width:36px;height:36px;border-radius:12px;background:#0e2a44;
+      display:grid;place-items:center;box-shadow:var(--shadow)}
+    .logo-badge svg{width:22px;height:22px;fill:#f0c766}
+    h1{margin:0;font-size:28px;letter-spacing:.3px}
+    .toolbar{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+    .input,.btn,select{border:1px solid transparent;background:var(--card);
+      color:var(--ink);border-radius:12px;padding:10px 14px;height:44px;
+      box-shadow:var(--shadow)}
+    .btn{background:#2c74ff;color:#fff;border:none;font-weight:600}
+    .btn.ghost{background:var(--card);color:var(--ink)}
+    .tabs{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+    .tab{padding:10px 16px;border-radius:12px;background:var(--soft);color:var(--ink);
+      cursor:pointer;border:1px solid transparent}
+    .tab.active{background:#2c74ff;color:#fff}
+    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin:14px 0}
+    .grid{display:grid;gap:12px}
+    @media(min-width:820px){.grid-2{grid-template-columns:1fr 1fr}}
+    .stat{display:flex;align-items:center;justify-content:space-between}
+    .muted{color:var(--muted);font-size:14px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid rgba(140,150,170,.15)}
+    th{text-align:left;color:var(--muted);font-weight:600}
+    .pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .ok{background:rgba(27,191,116,.12);color:#11a364}
+    .warn{background:rgba(255,178,0,.16);color:#c58900}
+    .bad{background:rgba(255,107,107,.16);color:#c84d4d}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .grow{flex:1}
+    .hint{font-size:12px;color:var(--muted)}
+    .right{margin-left:auto}
+    .toggle{display:flex;align-items:center;gap:8px}
+    .select-like{position:relative}
+    .select-like select{appearance:none;padding-right:34px}
+    .select-like:after{
+      content:"▾";position:absolute;right:10px;top:10px;color:var(--muted)}
   </style>
 </head>
 <body>
-<div class="wrap" id="app" data-theme="Blue">
-
-  <header>
-    <div class="logo">
-      <img src="/icons/icon-192.png" alt="logo">
-      <h1>Smart Budget</h1>
-    </div>
-
-    <div class="controls">
-      <input id="nameInput" placeholder="Your name" style="width:160px">
-      <select id="currencySel">
-        <option value="€">€ EUR</option>
-        <option value="$">$ USD</option>
-        <option value="£">£ GBP</option>
-      </select>
-      <select id="themeSel">
-        <option>Blue</option><option>Sage</option><option>Sand</option>
-      </select>
-
-      <button id="btnSign" class="brand">Sign in with Google</button>
-      <button id="btnOut" class="ghost" style="display:none">Sign out</button>
-      <button id="btnNotif" class="ghost">Enable Notifications 🔔</button>
-    </div>
-  </header>
-
-  <nav>
-    <button class="active" data-tab="dashboard">Dashboard</button>
-    <button data-tab="commitments">Commitments</button>
-    <button data-tab="expenses">Expenses</button>
-  </nav>
-
-  <!-- Dashboard -->
-  <section id="dashboard" class="card">
-    <h2>Welcome, <span id="welcomeName">Guest</span> 👋</h2>
-    <blockquote class="card" style="margin:12px 0 16px; border:1px dashed var(--soft); background:#fafcff">
-      “Track your money. Master your life.”
-    </blockquote>
-
-    <div class="grid cols-3">
-      <div class="card stat">
-        <h3>Total Balance <span class="hint">Income − Out</span></h3>
-        <div class="big" id="statBalance">€ 0.00</div>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <div class="logo-badge" aria-hidden="true">
+          <!-- أيقونة المحفظة + المخطط + العدسة + الصح -->
+          <svg viewBox="0 0 24 24">
+            <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H16l.6 1.8H6a2 2 0 0 0-2 2v8.2A2 2 0 0 0 6 19h11a2 2 0 0 0 2-2v-4h-4.3a2.7 2.7 0 1 1 0-5.4H19a2 2 0 0 1 2 2V17a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9.5Z"/>
+          </svg>
+        </div>
+        <h1>Smart Budget</h1>
       </div>
-      <div class="card stat">
-        <h3>Total Expenses (month)</h3>
-        <div class="big" id="statExpenses">€ 0.00</div>
+
+      <div class="toolbar">
+        <input id="nameInput" class="input" placeholder="Your name"/>
+        <div class="select-like"><select id="currencySel" class="input">
+          <option value="€">€ EUR</option><option value="$">$ USD</option><option value="£">£ GBP</option>
+        </select></div>
+        <div class="select-like"><select id="themeSel" class="input">
+          <option value="Blue">Blue</option><option value="Sage">Sage</option><option value="Sand">Sand</option>
+        </select></div>
+        <button id="googleBtn" class="btn">Sign in with Google</button>
+        <button id="notifBtn" class="btn ghost">Enable Notifications 🔔</button>
+        <div class="toggle">
+          <label class="muted">Dark</label>
+          <input type="checkbox" id="darkToggle">
+        </div>
       </div>
-      <div class="card stat">
-        <h3>% Commitments Paid</h3>
-        <div class="progress"><i id="paidBar"></i></div>
-        <div class="hint"><span id="paidPct">0%</span> (<span id="paidCount">0/0</span>)</div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button data-tab="dash" class="tab active">Dashboard</button>
+      <button data-tab="commit" class="tab">Commitments</button>
+      <button data-tab="exp" class="tab">Expenses</button>
+      <button data-tab="save" class="tab">Savings</button>
+      <button data-tab="events" class="tab">Events</button>
+      <button data-tab="notes" class="tab">Notes</button>
+      <button data-tab="analysis" class="tab">Analysis</button>
+    </nav>
+
+    <!-- Dashboard -->
+    <section id="dash" class="card">
+      <h2>Welcome, <span id="welcomeName">Guest</span> 👋</h2>
+      <div class="card muted" style="margin-top:10px">
+        “Track your money. Master your life.”
       </div>
-    </div>
-  </section>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="stat">
+            <div>
+              <div class="muted">Total Balance</div>
+              <div id="statBalance" style="font-size:28px;font-weight:800">€ 0.00</div>
+              <div class="hint">Income − Out</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="stat">
+            <div>
+              <div class="muted">Total Expenses (month)</div>
+              <div id="statExp" style="font-size:28px;font-weight:800">€ 0.00</div>
+              <div class="hint">variable</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="muted">% Commitments Paid</div>
+        <progress id="paidProg" max="100" value="0" style="width:100%;height:12px"></progress>
+        <div class="hint" id="paidHint">0% (0/0)</div>
+      </div>
+      <div class="card">
+        <div class="muted">Next Event</div>
+        <div id="nextEvent">—</div>
+      </div>
+    </section>
 
-  <!-- Commitments -->
-  <section id="commitments" class="card" style="display:none">
-    <h2>Commitments (Fixed Payments)</h2>
-    <div class="row" style="margin-top:10px">
-      <input id="c_name" placeholder="Commitment name">
-      <select id="c_cat">
-        <option>Groceries</option><option>Coffee & Snacks</option><option>Dining Out</option>
-        <option>Household Supplies</option><option>Fuel / Gas</option><option>Public Transport</option>
-        <option>Car Maintenance</option><option>Rent / Mortgage</option><option>Electricity</option>
-        <option>Water</option><option>Internet & Phone</option><option>Home Maintenance</option>
-        <option>Healthcare / Medicine</option><option>Insurance</option><option>Gym / Fitness</option>
-        <option>Personal Care</option><option>Clothing & Accessories</option><option>Gifts & Celebrations</option>
-        <option>Entertainment</option><option>Hobbies & Subscriptions</option><option>Courses & Learning</option>
-        <option>Books & Materials</option><option>Work Expenses</option><option>Software & Apps</option>
-        <option>Savings / Investments</option><option>Travel</option><option>Accommodation</option>
-        <option>Activities & Tickets</option><option>Donations & Charity</option><option>Taxes & Fees</option>
-        <option>Miscellaneous</option>
-      </select>
-      <input id="c_amount" type="number" min="0" step="0.01" placeholder="Monthly amount">
-      <input id="c_due" type="date">
-      <button id="c_add" class="brand">+ Add</button>
-    </div>
+    <!-- Commitments -->
+    <section id="commit" class="card" hidden>
+      <h2>Commitments (Fixed Payments)</h2>
+      <div class="row">
+        <input id="cName" class="input grow" placeholder="Commitment name"/>
+        <div class="select-like grow">
+          <select id="cCat" class="input">
+            <option>Rent / Mortgage</option><option>Electricity</option><option>Water</option>
+            <option>Internet & Phone</option><option>Insurance</option><option>Gym / Fitness</option>
+            <option>Healthcare / Medicine</option><option>Subscriptions</option><option>Gifts & Celebrations</option>
+            <option>Taxes & Fees</option><option>Savings / Investments</option><option>Miscellaneous</option>
+          </select>
+        </div>
+        <input id="cMonthly" class="input" type="number" step="0.01" placeholder="Monthly amount"/>
+        <input id="cDue" class="input" type="date"/>
+        <button id="cAdd" class="btn">+ Add</button>
+      </div>
 
-    <div class="hint" style="margin:10px 0">Status colors: <span class="badge paid">Paid</span> <span class="badge soon">Due ≤ 3 days</span> <span class="badge over">Overdue</span></div>
+      <div class="row" style="margin-top:8px">
+        <div class="muted">Legend:</div>
+        <span class="pill ok">Paid</span>
+        <span class="pill warn">Due ≤3d</span>
+        <span class="pill bad">Overdue</span>
+        <span class="right muted">Total: <b id="cTotal">€ 0.00</b></span>
+      </div>
 
-    <div class="card" style="margin-top:14px; overflow:auto">
-      <table>
-        <thead>
-          <tr>
+      <div class="card">
+        <table id="cTable">
+          <thead><tr>
             <th>Name</th><th>Category</th><th>Monthly</th><th>Due</th><th>Status</th><th>Notes</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="c_tbody"></tbody>
-      </table>
-    </div>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
-    <div class="row" style="margin-top:10px">
-      <div class="card stat"><h3>Total</h3><div class="big" id="c_total">€ 0.00</div></div>
-      <div class="card stat"><h3>Paid this month</h3><div class="big" id="c_paid_count">0</div></div>
-      <div class="card stat"><h3>Next due in</h3><div class="big" id="c_next_due">—</div></div>
-    </div>
-  </section>
+      <div class="muted" id="nextDue">Next due in — days</div>
+    </section>
 
-  <!-- Expenses -->
-  <section id="expenses" class="card" style="display:none">
-    <h2>Expenses (Variable)</h2>
-    <div class="row" style="margin-top:10px">
-      <input id="e_date" type="date">
-      <select id="e_cat">
-        <option>Groceries</option><option>Coffee & Snacks</option><option>Dining Out</option>
-        <option>Household Supplies</option><option>Fuel / Gas</option><option>Public Transport</option>
-        <option>Car Maintenance</option><option>Electricity</option><option>Water</option><option>Internet & Phone</option>
-        <option>Home Maintenance</option><option>Healthcare / Medicine</option><option>Insurance</option><option>Gym / Fitness</option>
-        <option>Personal Care</option><option>Clothing & Accessories</option><option>Gifts & Celebrations</option>
-        <option>Entertainment</option><option>Hobbies & Subscriptions</option><option>Courses & Learning</option>
-        <option>Books & Materials</option><option>Work Expenses</option><option>Software & Apps</option>
-        <option>Savings / Investments</option><option>Travel</option><option>Accommodation</option>
-        <option>Activities & Tickets</option><option>Donations & Charity</option><option>Taxes & Fees</option>
-        <option>Miscellaneous</option>
-      </select>
-      <input id="e_desc" placeholder="Description">
-      <input id="e_amount" type="number" min="0" step="0.01" placeholder="Amount">
-      <select id="e_method"><option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option></select>
-      <button id="e_add" class="brand">+ Add</button>
-    </div>
+    <!-- Expenses -->
+    <section id="exp" class="card" hidden>
+      <h2>Expenses (Variable)</h2>
+      <div class="row">
+        <input id="eDate" class="input" type="date"/>
+        <div class="select-like"><select id="eCat" class="input">
+          <option>Groceries</option><option>Coffee & Snacks</option><option>Dining Out</option>
+          <option>Household Supplies</option><option>Fuel / Gas</option><option>Public Transport</option>
+          <option>Car Maintenance</option><option>Healthcare / Medicine</option><option>Personal Care</option>
+          <option>Clothing & Accessories</option><option>Entertainment</option><option>Hobbies & Subscriptions</option>
+          <option>Courses & Learning</option><option>Books & Materials</option><option>Work Expenses</option>
+          <option>Software & Apps</option><option>Savings / Investments</option>
+          <option>Travel</option><option>Accommodation</option><option>Activities & Tickets</option>
+          <option>Donations & Charity</option><option>Taxes & Fees</option><option>Miscellaneous</option>
+        </select></div>
+        <input id="eDesc" class="input grow" placeholder="Description"/>
+        <input id="eAmt" class="input" type="number" step="0.01" placeholder="Amount"/>
+        <div class="select-like"><select id="eMethod" class="input">
+          <option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option>
+        </select></div>
+        <button id="eAdd" class="btn">+ Add</button>
+      </div>
 
-    <div class="card" style="margin-top:14px; overflow:auto">
-      <table>
-        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Method</th><th></th></tr></thead>
-        <tbody id="e_tbody"></tbody>
-      </table>
-    </div>
+      <div class="row" style="margin-top:8px">
+        <span class="muted">Total: <b id="eTotal">€ 0.00</b></span>
+        <span class="muted">Top 3: <b id="eTop">—</b></span>
+        <span class="muted right">Avg/day: <b id="eAvg">€ 0.00</b></span>
+      </div>
 
-    <div class="row" style="margin-top:10px">
-      <div class="card stat"><h3>Total (month)</h3><div class="big" id="e_total">€ 0.00</div></div>
-      <div class="card stat"><h3>Top 3 categories</h3><div id="e_top3" class="hint">—</div></div>
-      <div class="card stat"><h3>Avg/day</h3><div class="big" id="e_avg">€ 0.00</div></div>
-    </div>
-  </section>
+      <div class="card">
+        <table id="eTable">
+          <thead><tr>
+            <th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Method</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
-  <div class="toast" id="toast">Saved</div>
-</div>
+    <!-- Savings -->
+    <section id="save" class="card" hidden>
+      <h2>Saving Plans</h2>
+      <div class="row">
+        <input id="sName" class="input grow" placeholder="Goal name"/>
+        <div class="select-like"><select id="sCat" class="input">
+          <option>Vacation</option><option>Wedding</option><option>Investment</option><option>Other</option>
+        </select></div>
+        <input id="sTarget" class="input" type="number" step="0.01" placeholder="Target amount"/>
+        <input id="sMonths" class="input" type="number" min="1" placeholder="Duration (months)"/>
+        <input id="sStart" class="input" type="date"/>
+        <input id="sEnd" class="input" type="date"/>
+        <label class="input" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="sToCommit"> Add to Commitments
+        </label>
+        <button id="sAdd" class="btn">+ Add</button>
+      </div>
+      <div class="card">
+        <table id="sTable">
+          <thead><tr>
+            <th>Goal</th><th>Category</th><th>Target</th><th>Months</th><th>Monthly</th><th>Period</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
-<!-- Firebase (modular v10 CDN) -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-  import { getFirestore, enableIndexedDbPersistence, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    <!-- Events -->
+    <section id="events" class="card" hidden>
+      <h2>Events & Gifts</h2>
+      <div class="row">
+        <input id="vName" class="input grow" placeholder="Event name"/>
+        <div class="select-like"><select id="vType" class="input">
+          <option>Birthday</option><option>Wedding</option><option>Holiday</option>
+          <option>Gift</option><option>Other</option>
+        </select></div>
+        <input id="vDate" class="input" type="date"/>
+        <input id="vSpend" class="input" type="number" step="0.01" placeholder="Planned Spending"/>
+        <label class="input" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="vToCommit"> Add to Commitments
+        </label>
+        <button id="vAdd" class="btn">+ Add</button>
+      </div>
+      <div class="hint" style="margin-top:6px">
+        Reminder colors: ≤30d (blue) · ≤7d (orange) · ≤3d (red) · past (gray)
+      </div>
+      <div class="card">
+        <table id="vTable">
+          <thead><tr>
+            <th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminders</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
-  // --- Firebase config (من مشروعك) ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyCfnCTuunR_E15GQaPQyUbS2Fdj6XAYfUo",
-    authDomain: "smart-budget-61664.firebaseapp.com",
-    projectId: "smart-budget-61664",
-    storageBucket: "smart-budget-61664.firebasestorage.app",
-    messagingSenderId: "273780649075",
-    appId: "1:273780649075:web:c0c08d6d5f65085e9e0e06",
-    measurementId: "G-FNJJPP90FH"
+    <!-- Notes -->
+    <section id="notes" class="card" hidden>
+      <h2>Notes</h2>
+      <textarea id="notesArea" class="input" style="width:100%;height:200px" placeholder="Write anything here..."></textarea>
+      <div class="hint">Autosaves locally & syncs to cloud when signed in.</div>
+    </section>
+
+    <!-- Analysis -->
+    <section id="analysis" class="card" hidden>
+      <h2>Analysis</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Monthly by Category</h3>
+          <canvas id="chart1" height="220"></canvas>
+        </div>
+        <div class="card">
+          <h3>Commitments Paid %</h3>
+          <canvas id="chart2" height="220"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Helper formulas (Google Sheets)</h3>
+        <ul class="muted">
+          <li>Days to Event: <code>= [Event_Date] - TODAY()</code></li>
+          <li>Months to Save: <code>=DATEDIF([Start_Date],[End_Date],"M")+1</code></li>
+          <li>Monthly Contribution: <code>=ROUNDUP([Target]/[Months],2)</code></li>
+          <li>Status: <code>=IF([Paid]>=[Amount],"Paid",IF([Due]&lt;TODAY(),"Overdue",IF([Due]-TODAY()&lt;=3,"Due Soon","Pending")))</code></li>
+          <li>SUM per category: <code>=SUMIF([Category],[X],[Amount])</code></li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <!-- Chart.js (للاختصاره نستخدم نسخة خفيفة) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+  // =============== تهيئة بسيطة لحفظ الحالة ===============
+  const $ = (q, p=document) => p.querySelector(q);
+  const $$ = (q, p=document) => [...p.querySelectorAll(q)];
+  const state = {
+    user:null, currency:"€", themeAccent:"Blue", dark:false, name:"",
+    commitments:[], expenses:[], savings:[], events:[], notes:""
   };
+  const key = 'sb_v2';
 
-  const appFB = initializeApp(firebaseConfig);
-  const auth = getAuth(appFB);
-  const db = getFirestore(appFB);
-  try { await enableIndexedDbPersistence(db) } catch(e){ console.warn('persistence', e) }
+  function loadLocal(){
+    try{
+      const s = JSON.parse(localStorage.getItem(key)||'{}');
+      Object.assign(state, s);
+    }catch{}
+  }
+  function saveLocal(){
+    localStorage.setItem(key, JSON.stringify(state));
+  }
 
-  // --- Elements ---
-  const $ = (s)=>document.querySelector(s);
-  const $$ = (s)=>document.querySelectorAll(s);
-  const app = $('#app');
-  const btnSign=$('#btnSign'), btnOut=$('#btnOut');
-  const nameInput=$('#nameInput'), welcomeName=$('#welcomeName');
-  const currencySel=$('#currencySel'), themeSel=$('#themeSel');
-  const toast=$("#toast");
-  function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1500) }
-
-  // --- Theme/Currency persistence ---
-  const savedTheme = localStorage.getItem('sb_theme') || 'Blue';
-  const savedCurr  = localStorage.getItem('sb_curr') || '€';
-  themeSel.value = savedTheme; app.dataset.theme = savedTheme;
-  currencySel.value = ['€ EUR','$ USD','£ GBP'].find(x=>x.startsWith(savedCurr))?currencySel.value:savedCurr;
-  themeSel.onchange = ()=>{ app.dataset.theme = themeSel.value; localStorage.setItem('sb_theme', themeSel.value) }
-  currencySel.onchange = ()=> localStorage.setItem('sb_curr', currencySel.value[0]);
-
-  // --- Tabs ---
-  $$('nav button').forEach(b=>b.onclick = ()=>{
-    $$('nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-    ['dashboard','commitments','expenses'].forEach(id => $('#'+id).style.display = (b.dataset.tab===id?'block':'none'));
+  // =============== Firebase ===============
+  let app, auth, db;
+  window.addEventListener('load', async () => {
+    // بدّلي القيم أدناه بقيم مشروعك (من صفحة Project settings)
+    const firebaseConfig = {
+      apiKey: "REPLACE_ME",
+      authDomain: "REPLACE_ME.firebaseapp.com",
+      projectId: "REPLACE_ME",
+      storageBucket: "REPLACE_ME.appspot.com",
+      messagingSenderId: "REPLACE_ME",
+      appId: "REPLACE_ME"
+    };
+    app = firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
   });
 
-  // --- Auth ---
-  const provider = new GoogleAuthProvider();
-  btnSign.onclick = async ()=>{
-    try{ await signInWithPopup(auth, provider) }catch(e){ alert(e.message) }
-  };
-  btnOut.onclick = ()=>signOut(auth);
-
-  let uid=null, curSymbol='€';
-  onAuthStateChanged(auth, user=>{
-    if(user){
-      uid = user.uid;
-      btnSign.style.display='none'; btnOut.style.display='inline-block';
-      nameInput.value = user.displayName || nameInput.value || '';
-      welcomeName.textContent = nameInput.value || 'Friend';
-      bindCommitments();
-      bindExpenses();
-    } else {
-      uid=null;
-      btnSign.style.display='inline-block'; btnOut.style.display='none';
-      $('#c_tbody').innerHTML=''; $('#e_tbody').innerHTML='';
-      refreshStats();
+  async function syncFromCloud(){
+    if(!state.user) return;
+    const doc = await db.collection('users').doc(state.user.uid).get();
+    if(doc.exists){
+      const cloud = doc.data();
+      // ندمج بدون فقد محلي
+      ['commitments','expenses','savings','events','notes','name','currency','themeAccent','dark'].forEach(k=>{
+        if(cloud[k]!==undefined) state[k]=cloud[k];
+      });
+      saveLocal(); renderAll();
     }
-  });
-
-  nameInput.oninput = ()=>{ welcomeName.textContent = nameInput.value || 'Friend'; localStorage.setItem('sb_name', nameInput.value) }
-  nameInput.value = localStorage.getItem('sb_name') || '';
-
-  // --- Helpers ---
-  const fmt = (v)=>`${(currencySel.value||'€')[0]} ${Number(v||0).toFixed(2)}`;
-  const daysBetween = (d)=> Math.ceil((new Date(d).setHours(23,59,59,999) - Date.now())/86400000);
-
-  // --- Commitments CRUD ---
-  const cRef = ()=>collection(db,'users',uid,'commitments');
-  $('#c_add').onclick = async ()=>{
-    if(!uid) return alert('Sign in first');
-    const name=$('#c_name').value.trim();
-    const cat=$('#c_cat').value;
-    const amount=Number($('#c_amount').value||0);
-    const due=$('#c_due').value;
-    if(!name||!amount||!due) return alert('Please fill all fields');
-    await addDoc(cRef(), {name,cat,amount,due,paid:false,ts:serverTimestamp()});
-    $('#c_name').value=''; $('#c_amount').value=''; showToast('Commitment added');
-  };
-
-  function rowStatus(d){
-    const days = daysBetween(d.due);
-    if(d.paid) return {label:'Paid', cls:'paid'};
-    if(days < 0) return {label:'Overdue', cls:'over'};
-    if(days <= 3) return {label:'Due soon', cls:'soon'};
-    return {label:'Pending', cls:''};
+  }
+  async function syncToCloud(){
+    if(!state.user) return;
+    const payload = {
+      name:state.name,currency:state.currency,themeAccent:state.themeAccent,dark:state.dark,
+      commitments:state.commitments,expenses:state.expenses,savings:state.savings,
+      events:state.events,notes:state.notes, updatedAt: new Date()
+    };
+    await db.collection('users').doc(state.user.uid).set(payload,{merge:true});
   }
 
-  function bindCommitments(){
-    const qy = query(cRef(), orderBy('ts','desc'));
-    onSnapshot(qy, snap=>{
-      let total=0, paid=0, next = Infinity;
-      const tbody = $('#c_tbody'); tbody.innerHTML='';
-      snap.forEach(docu=>{
-        const d={id:docu.id, ...docu.data()};
-        total += Number(d.amount||0);
-        if(d.paid) paid++;
-        const dv = daysBetween(d.due); if(dv>=0) next = Math.min(next, dv);
-
-        const s = rowStatus(d);
-        const tr=document.createElement('tr');
-        tr.innerHTML = `
-          <td>${d.name}</td>
-          <td>${d.cat}</td>
-          <td>${fmt(d.amount)}</td>
-          <td>${d.due}</td>
-          <td><span class="badge ${s.cls}">${s.label}</span></td>
-          <td>${d.notes||''}</td>
-          <td>
-            <button data-act="toggle">✔</button>
-            <button data-act="del" style="color:#b00">🗑</button>
-          </td>`;
-        tr.querySelector('[data-act="toggle"]').onclick = ()=>updateDoc(doc(db,'users',uid,'commitments',d.id),{paid:!d.paid});
-        tr.querySelector('[data-act="del"]').onclick = ()=>deleteDoc(doc(db,'users',uid,'commitments',d.id));
-        tbody.appendChild(tr);
-      });
-      $('#c_total').textContent = fmt(total);
-      $('#c_paid_count').textContent = String(paid);
-      $('#c_next_due').textContent = (next===Infinity?'—':(next+' days'));
-      refreshStats(); // recalculates dashboard + bars
-      // push visual reminders if permission granted
-      scheduleLocalAlertsForUpcoming();
-    });
-  }
-
-  // --- Expenses CRUD ---
-  const eRef = ()=>collection(db,'users',uid,'expenses');
-  $('#e_add').onclick = async ()=>{
-    if(!uid) return alert('Sign in first');
-    const date=$('#e_date').value || new Date().toISOString().slice(0,10);
-    const cat=$('#e_cat').value;
-    const desc=$('#e_desc').value.trim();
-    const amount=Number($('#e_amount').value||0);
-    const method=$('#e_method').value;
-    if(!amount) return alert('Enter amount');
-    await addDoc(eRef(), {date,cat,desc,amount,method,ts:serverTimestamp()});
-    $('#e_amount').value=''; $('#e_desc').value='';
-    showToast('Expense added');
-  };
-
-  function bindExpenses(){
-    const qy = query(eRef(), orderBy('ts','desc'));
-    onSnapshot(qy, snap=>{
-      let total=0; const tbody=$('#e_tbody'); tbody.innerHTML='';
-      const catSum = {};
-      let firstDay=null, lastDay=null;
-
-      snap.forEach(docu=>{
-        const d={id:docu.id, ...docu.data()};
-        total += Number(d.amount||0);
-        catSum[d.cat]=(catSum[d.cat]||0)+Number(d.amount||0);
-
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
-          <td>${d.date||''}</td><td>${d.cat||''}</td><td>${d.desc||''}</td>
-          <td>${fmt(d.amount)}</td><td>${d.method||''}</td>
-          <td><button data-del>🗑</button></td>`;
-        tr.querySelector('[data-del]').onclick = ()=>deleteDoc(doc(db,'users',uid,'expenses',d.id));
-        tbody.appendChild(tr);
-
-        const dt=new Date(d.date||Date.now());
-        firstDay = firstDay?Math.min(firstDay, dt):dt;
-        lastDay  = lastDay?Math.max(lastDay,  dt):dt;
-      });
-
-      $('#e_total').textContent = fmt(total);
-      const days = firstDay && lastDay ? Math.max(1, Math.ceil((lastDay-firstDay)/86400000)+1) : 1;
-      $('#e_avg').textContent = fmt(total/days);
-
-      const top = Object.entries(catSum).sort((a,b)=>b[1]-a[1]).slice(0,3)
-        .map(([k,v])=>`${k} ${fmt(v)}`).join(' · ') || '—';
-      $('#e_top3').textContent = top;
-
-      refreshStats();
-    });
-  }
-
-  // --- Dashboard quick stats ---
-  function refreshStats(){
-    // هنا بإمكانك إضافة دخل المستخدم لحساب الرصيد إن رغبتِ
-    const expTxt = $('#e_total').textContent || '€ 0.00';
-    $('#statExpenses').textContent = expTxt;
-    const paid = Number($('#c_paid_count').textContent||0);
-    const tb = $('#c_total').textContent.replace(/[^\d.]/g,'')||'0';
-    const total = Number(tb);
-    const pct = !total?0:Math.round(paid/paid /* dummy to display count only */);
-    const barPct = !total?0:Math.round((paid/Math.max(1, paid + (total>0?1:0)))*100); // simple
-    $('#paidBar').style.width = barPct + '%';
-    $('#paidPct').textContent = barPct + '%';
-    $('#paidCount').textContent = `${paid}/${paid}`;
-    $('#statBalance').textContent = '€ 0.00';
-  }
-
-  // --- OneSignal (in-page) ---
+  // =============== OneSignal ===============
   window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
+  OneSignalDeferred.push(async function(OneSignal){
     await OneSignal.init({
       appId: "5dbef29c-1d7a-403d-9399-b2566983cc30",
-      safari_web_id: null,
-      allowLocalhostAsSecureOrigin: true,
-      notifyButton: { enable: false },
+      notifyButton: { enable: false }
     });
+    window.requestPush = () => OneSignal.Notifications.requestPermission();
   });
 
-  const btnNotif = document.getElementById('btnNotif');
-  btnNotif.onclick = async ()=>{
-    if(!('OneSignal' in window)) return alert('OneSignal SDK not loaded yet');
-    const permission = await OneSignal.User.PushConsent.get();
-    await OneSignal.Slidedown.promptPush();
+  // =============== PWA: manifest + ServiceWorker ===============
+  // نولّد manifest أيقونات أساسية (يمكن استبدال الروابط لاحقًا)
+  const icons = [
+    {src:"/icons/icon-192.png",sizes:"192x192",type:"image/png"},
+    {src:"/icons/icon-512.png",sizes:"512x512",type:"image/png"},
+    {src:"/icons/maskable-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}
+  ];
+  const manifest = {
+    name:"Smart Budget",
+    short_name:"SmartBudget",
+    start_url:"./",
+    display:"standalone",
+    background_color:"#0e2a44",
+    theme_color:"#0e2a44",
+    icons
+  };
+  const mURL = URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/json'}));
+  $('#manifestLink').setAttribute('href', mURL);
+
+  // sw بسيط للتخزين الأوفلاين
+  const swCode = `
+    const CACHE='sb-v2';
+    const ASSETS = ['/', './', 'index.html',
+      'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+      'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'
+    ];
+    self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
+    self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});
+    self.addEventListener('fetch',e=>{
+      const req=e.request;
+      e.respondWith(caches.match(req).then(r=>r||fetch(req).then(res=>{
+        const copy=res.clone(); caches.open(CACHE).then(c=>c.put(req, copy)); return res;
+      }).catch(()=>r)));
+    });
+    // استقبال أمر عرض تنبيه محلي (عند فتح الموقع)
+    self.addEventListener('message',e=>{
+      const d=e.data||{};
+      if(d.type==='notify') self.registration.showNotification(d.title||'Reminder',{body:d.body||'',icon:d.icon||null});
+    });
+  `;
+  if('serviceWorker' in navigator){
+    const swURL = URL.createObjectURL(new Blob([swCode],{type:'text/javascript'}));
+    navigator.serviceWorker.register(swURL);
+  }
+
+  // =============== واجهة المستخدم & منطق الصفحات ===============
+  loadLocal();
+
+  // إعدادات عامة
+  const nameInput = $('#nameInput'), curSel = $('#currencySel'), themeSel = $('#themeSel'),
+        darkToggle = $('#darkToggle'), welcomeName = $('#welcomeName');
+
+  function applyTheme(){
+    document.documentElement.dataset.theme = state.dark ? 'dark' : 'light';
+    // تلوين ناعم حسب الـ accent (بشكل بسيط)
+    const map = {Blue:'var(--blue)', Sage:'var(--sage)', Sand:'var(--sand)'};
+    document.querySelectorAll('.tab:not(.active)').forEach(t=>t.style.background = getComputedStyle(document.documentElement).getPropertyValue('--soft'));
+    document.querySelectorAll('.card').forEach(c=>c.style.borderColor='transparent');
+    document.body.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg');
+  }
+
+  function bindBasics(){
+    nameInput.value = state.name||'';
+    curSel.value = state.currency||'€';
+    themeSel.value = state.themeAccent||'Blue';
+    darkToggle.checked = !!state.dark;
+    welcomeName.textContent = state.name || 'Guest';
+
+    nameInput.oninput = () => {state.name = nameInput.value; welcomeName.textContent = state.name||'Guest'; saveLocal(); syncToCloud()};
+    curSel.onchange = () => {state.currency = curSel.value; saveLocal(); renderAll(); syncToCloud()};
+    themeSel.onchange = () => {state.themeAccent = themeSel.value; saveLocal(); applyTheme(); syncToCloud()};
+    darkToggle.onchange = () => {state.dark = darkToggle.checked; saveLocal(); applyTheme(); syncToCloud()};
+    $('#notifBtn').onclick = () => window.requestPush && window.requestPush();
+  }
+
+  // تبويب
+  $$('#tabs .tab').forEach(t=>{
+    t.onclick = ()=> {
+      $$('#tabs .tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      ['dash','commit','exp','save','events','notes','analysis'].forEach(id=>{
+        $('#'+id).hidden = id !== t.dataset.tab;
+      });
+      if(t.dataset.tab==='analysis') drawCharts();
+    }
+  });
+
+  // ===== Commitments =====
+  const cBody = $('#cTable tbody');
+  function renderCommitments(){
+    cBody.innerHTML = '';
+    let paid = 0, total = 0, soon = Infinity;
+    const today = new Date();
+    state.commitments.forEach((r,idx)=>{
+      total += (+r.amount||0);
+      const tr = document.createElement('tr');
+      const due = new Date(r.due);
+      const days = Math.ceil((due - today)/(1000*60*60*24));
+      let status = r.paid ? 'Paid' : (days < 0 ? 'Overdue' : (days<=3?'Due soon':'Pending'));
+      if(r.paid) paid++;
+      if(days>=0) soon = Math.min(soon, days);
+
+      tr.innerHTML = `
+        <td>${r.name||''}</td>
+        <td>${r.cat||''}</td>
+        <td>${fmt(r.amount)}</td>
+        <td>${r.due||''}</td>
+        <td>
+          <span class="pill ${r.paid?'ok':(days<0?'bad':(days<=3?'warn':''))}">${status}</span>
+          <label class="hint" style="margin-left:8px"><input type="checkbox" ${r.paid?'checked':''} data-idx="${idx}" class="cPaid"> Paid</label>
+        </td>
+        <td contenteditable data-idx="${idx}" class="cNote">${r.note||''}</td>
+        <td><button class="btn ghost cDel" data-idx="${idx}">✕</button></td>
+      `;
+      cBody.appendChild(tr);
+    });
+    $('#cTotal').textContent = fmt(total);
+    $('#nextDue').textContent = isFinite(soon) ? `Next due in ${soon} days` : 'Next due —';
+    // شريط في الداشبورد
+    const pct = state.commitments.length? Math.round(100*paid/state.commitments.length):0;
+    $('#paidProg').value = pct; $('#paidHint').textContent = `${pct}% (${paid}/${state.commitments.length})`;
+    saveLocal(); syncToCloud();
+  }
+  $('#cAdd').onclick = ()=>{
+    const r = {
+      name:$('#cName').value.trim(),
+      cat:$('#cCat').value,
+      amount:+$('#cMonthly').value||0,
+      due:$('#cDue').value,
+      paid:false,note:""
+    };
+    if(!r.name || !r.due) return alert('Please add name & due date');
+    state.commitments.push(r);
+    $('#cName').value=''; $('#cMonthly').value=''; $('#cDue').value='';
+    renderCommitments(); scheduleLocalReminders();
+  };
+  cBody.addEventListener('change',e=>{
+    if(e.target.classList.contains('cPaid')){
+      const i = +e.target.dataset.idx; state.commitments[i].paid = e.target.checked;
+      renderCommitments();
+    }
+  });
+  cBody.addEventListener('click',e=>{
+    if(e.target.classList.contains('cDel')){
+      const i = +e.target.dataset.idx; state.commitments.splice(i,1); renderCommitments();
+    }
+  });
+  cBody.addEventListener('input',e=>{
+    if(e.target.classList.contains('cNote')){
+      const i = +e.target.dataset.idx; state.commitments[i].note = e.target.textContent; saveLocal(); syncToCloud();
+    }
+  });
+
+  // ===== Expenses =====
+  const eBody = $('#eTable tbody');
+  $('#eDate').value = new Date().toISOString().slice(0,10);
+  $('#eAdd').onclick=()=>{
+    const r = {
+      date:$('#eDate').value, cat:$('#eCat').value, desc:$('#eDesc').value,
+      amt:+$('#eAmt').value||0, method:$('#eMethod').value
+    };
+    if(!r.date || !r.amt) return;
+    state.expenses.unshift(r);
+    $('#eDesc').value=''; $('#eAmt').value='';
+    renderExpenses();
+  };
+  function renderExpenses(){
+    eBody.innerHTML='';
+    let total=0; const byCat={}; let minD=Infinity,maxD=-Infinity, cnt=0;
+    state.expenses.forEach((r,i)=>{
+      total += r.amt; byCat[r.cat]=(byCat[r.cat]||0)+r.amt; cnt++;
+      const d=new Date(r.date).getTime(); minD=Math.min(minD,d); maxD=Math.max(maxD,d);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${r.date}</td><td>${r.cat}</td><td>${r.desc||''}</td>
+        <td>${fmt(r.amt)}</td><td>${r.method}</td>
+        <td><button class="btn ghost eDel" data-idx="${i}">✕</button></td>
+      `;
+      eBody.appendChild(tr);
+    });
+    $('#eTotal').textContent = fmt(total);
+    const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k} (${fmt(v)})`).join(', ')||'—';
+    $('#eTop').textContent = top;
+    const days = isFinite(minD)&&isFinite(maxD)? Math.max(1, Math.round((maxD-minD)/(1000*60*60*24))+1) : 1;
+    $('#eAvg').textContent = fmt(total/days);
+    saveLocal(); syncToCloud(); updateStats();
+  }
+  eBody.addEventListener('click',e=>{
+    if(e.target.classList.contains('eDel')){
+      const i=+e.target.dataset.idx; state.expenses.splice(i,1); renderExpenses();
+    }
+  });
+
+  // ===== Savings =====
+  const sBody = $('#sTable tbody');
+  $('#sAdd').onclick=()=>{
+    const m = Math.max(1, +$('#sMonths').value||0);
+    const r = {
+      name:$('#sName').value.trim(), cat:$('#sCat').value, target:+$('#sTarget').value||0,
+      months:m, monthly: Math.ceil((+$('#sTarget').value||0)/m*100)/100,
+      start:$('#sStart').value, end:$('#sEnd').value, addToCommit: $('#sToCommit').checked
+    };
+    if(!r.name||!r.target||!m) return;
+    state.savings.push(r);
+    if(r.addToCommit){
+      state.commitments.push({
+        name:`Saving – ${r.name}`, cat:'Savings / Investments', amount:r.monthly,
+        due:r.end||new Date().toISOString().slice(0,10), paid:false, note:''
+      });
+    }
+    ['sName','sTarget','sMonths','sStart','sEnd'].forEach(id=>$('#'+id).value='');
+    $('#sToCommit').checked=false;
+    renderSavings(); renderCommitments();
+  };
+  function renderSavings(){
+    sBody.innerHTML='';
+    state.savings.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${r.name}</td><td>${r.cat}</td><td>${fmt(r.target)}</td>
+        <td>${r.months}</td><td>${fmt(r.monthly)}</td>
+        <td>${r.start||''} → ${r.end||''}</td>
+        <td><button class="btn ghost sDel" data-idx="${i}">✕</button></td>
+      `;
+      sBody.appendChild(tr);
+    });
+    saveLocal(); syncToCloud();
+  }
+  sBody.addEventListener('click',e=>{
+    if(e.target.classList.contains('sDel')){
+      const i=+e.target.dataset.idx; state.savings.splice(i,1); renderSavings();
+    }
+  });
+
+  // ===== Events =====
+  const vBody = $('#vTable tbody');
+  $('#vAdd').onclick=()=>{
+    const r = {
+      name:$('#vName').value.trim(), type:$('#vType').value, date:$('#vDate').value,
+      planned:+$('#vSpend').value||0, addToCommit:$('#vToCommit').checked
+    };
+    if(!r.name||!r.date) return;
+    state.events.push(r);
+    if(r.addToCommit){
+      state.commitments.push({
+        name:`Gift – ${r.name}`, cat:'Gifts & Celebrations', amount:r.planned,
+        due:r.date, paid:false, note:''
+      });
+    }
+    ['vName','vSpend','vDate'].forEach(id=>$('#'+id).value='');
+    $('#vToCommit').checked=false;
+    renderEvents(); renderCommitments(); scheduleLocalReminders();
+  };
+  function renderEvents(){
+    vBody.innerHTML='';
+    const today = new Date();
+    let nextTxt='—', nextDelta=Infinity;
+    state.events.forEach((r,i)=>{
+      const d = new Date(r.date);
+      const delta = Math.ceil((d - today)/(1000*60*60*24));
+      let color='#9aa7b3';
+      if(delta<=30 && delta>7) color='#5fa8ff';
+      if(delta<=7 && delta>3) color='#ffb759';
+      if(delta<=3 && delta>=0) color='#ff6b6b';
+      if(delta>=0 && delta<nextDelta){nextDelta=delta; nextTxt=`${r.name} in ${delta} days`;}
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${r.name}</td><td>${r.type}</td><td>${r.date}</td>
+        <td>${fmt(r.planned)}</td>
+        <td><span class="pill" style="background:${color};color:#10223a">Reminder</span></td>
+        <td><button class="btn ghost vDel" data-idx="${i}">✕</button></td>
+      `;
+      vBody.appendChild(tr);
+    });
+    $('#nextEvent').textContent = nextTxt;
+    vBody.onclick = (e)=>{
+      if(e.target.classList.contains('vDel')){
+        const i=+e.target.dataset.idx; state.events.splice(i,1); renderEvents(); scheduleLocalReminders();
+      }
+    };
+    saveLocal(); syncToCloud();
+  }
+
+  // ===== Notes =====
+  $('#notesArea').addEventListener('input', e=>{
+    state.notes = e.target.value; saveLocal(); syncToCloud();
+  });
+
+  // ===== إحصائيات سريعة =====
+  function fmt(n){ return `${state.currency} ${(+n||0).toFixed(2)}`;}
+  function updateStats(){
+    const totalExp = state.expenses.reduce((a,b)=>a+(+b.amt||0),0);
+    $('#statExp').textContent = fmt(totalExp);
+    // balance مثال بسيط: (مدخلات غير موجودة، نفترض فقط -المصروفات)
+    $('#statBalance').textContent = fmt(-totalExp);
+  }
+
+  // ===== Charts =====
+  let ch1,ch2;
+  function drawCharts(){
+    const byCat={}; state.expenses.forEach(e=>byCat[e.cat]=(byCat[e.cat]||0)+(+e.amt||0));
+    const ctx1=$('#chart1').getContext('2d');
+    ch1 && ch1.destroy();
+    ch1 = new Chart(ctx1,{type:'doughnut',data:{
+      labels:Object.keys(byCat),
+      datasets:[{data:Object.values(byCat)}]
+    }});
+
+    const paid=state.commitments.filter(c=>c.paid).length;
+    const tot=state.commitments.length||1;
+    const ctx2=$('#chart2').getContext('2d');
+    ch2 && ch2.destroy();
+    ch2 = new Chart(ctx2,{type:'bar',data:{
+      labels:['Paid','Pending'],
+      datasets:[{data:[paid,tot-paid]}]
+    }});
+  }
+
+  // ===== تنبيهات محلية (عبر ServiceWorker حين يكون الموقع مفتوح/مثبّت) =====
+  function scheduleLocalReminders(){
+    if(!navigator.serviceWorker?.controller) return;
+    const today = new Date();
+    // التزامات
+    state.commitments.forEach(c=>{
+      if(c.paid||!c.due) return;
+      const d = new Date(c.due);
+      const delta = Math.ceil((d - today)/(1000*60*60*24));
+      if(delta<=3 && delta>=0){
+        navigator.serviceWorker.controller.postMessage({
+          type:'notify', title:'Commitment due soon',
+          body:`${c.name} in ${delta} day(s)`
+        });
+      }
+      if(delta<0){
+        navigator.serviceWorker.controller.postMessage({
+          type:'notify', title:'Overdue payment',
+          body:`${c.name} is overdue`
+        });
+      }
+    });
+    // أحداث
+    state.events.forEach(ev=>{
+      const d = new Date(ev.date);
+      const delta = Math.ceil((d - today)/(1000*60*60*24));
+      if([30,7,3].includes(delta)){
+        navigator.serviceWorker.controller.postMessage({
+          type:'notify', title:'Event reminder',
+          body:`${ev.name} in ${delta} day(s)`
+        });
+      }
+    });
+  }
+
+  // ===== تسجيل الدخول بقوقل =====
+  $('#googleBtn').onclick = async ()=>{
+    try{
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const res = await auth.signInWithPopup(provider);
+      state.user = res.user; saveLocal();
+      $('#googleBtn').textContent = 'Signed in ✓';
+      await syncFromCloud(); renderAll();
+    }catch(err){
+      alert('Google sign-in failed. Make sure your domain is authorized in Firebase.');
+      console.error(err);
+    }
   };
 
-  // إشعارات مرئية عند فتح التطبيق (بدون خادم)
-  async function scheduleLocalAlertsForUpcoming(){
-    if(!('OneSignal' in window)) return;
-    // نقرأ جدول الالتزامات المعروضة حاليًا ونرسل إشعار بسيط إذا ≤ 3 أيام أو Overdue
-    const rows = [...document.querySelectorAll('#c_tbody tr')].map(tr=>{
-      const tds = tr.querySelectorAll('td'); return {
-        name: tds[0]?.textContent || '',
-        due:  tds[3]?.textContent || '',
-        status: tds[4]?.innerText || ''
-      };
-    });
-    const soon = rows.filter(r=>/Due soon|Overdue/i.test(r.status));
-    for(const r of soon){
-      const title = /Overdue/.test(r.status)? 'Overdue payment' : 'Payment due soon';
-      const body  = `${r.name} — due ${r.due}`;
-      try { await OneSignal.Notifications.create({ contents:{en:body}, headings:{en:title} }) } catch(e){}
-    }
+  // ===== تهيئة أولية =====
+  function renderAll(){
+    bindBasics(); applyTheme();
+    renderCommitments(); renderExpenses(); renderSavings(); renderEvents();
+    $('#notesArea').value = state.notes||'';
+    updateStats();
   }
+  renderAll();
+  // أعِد جدولة التذكيرات كلما تغيّر شيء
+  ['commitments','events'].forEach(k=>{
+    const orig = state.__defineSetter__ ? null : null; // placeholder
+  });
+  setInterval(scheduleLocalReminders, 60*1000); // فحص كل دقيقة خفيفة
 
-  // --- Service Worker registration ---
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').catch(console.warn);
-  }
-</script>
-
-<!-- OneSignal SDK -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  </script>
 </body>
-</html>
+  </html>
