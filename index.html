@@ -6,23 +6,22 @@
 <title>Smart Budget & Commitments Dashboard</title>
 
 <!-- PWA manifest + icons -->
-<link rel="manifest" href="/manifest.webmanifest">
+<link rel="manifest" href="/Manifest.webmanifest">
 <meta name="theme-color" content="#0f1f39"/>
 
-<!-- Favicon (classic) - files are in the project ROOT -->
-<link rel="icon" type="image/png" sizes="16x16"  href="/icon-16.png">
-<link rel="icon" type="image/png" sizes="32x32"  href="/icon-32.png">
-<link rel="icon" type="image/png" sizes="64x64"   href="/icon-64.png">
-<link rel="icon" type="image/png" sizes="128x128" href="/icon-128.png">
+<!-- Favicon (classic) -->
+<link rel="icon" type="image/png" sizes="16x16"  href="/icons/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32"  href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="64x64"  href="/icons/icon-64.png">
+<link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128.png">
 
 <!-- PWA icons -->
-<link rel="icon" type="image/png" sizes="180x180" href="/icon-180.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="256x256" href="/icon-256.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="256x256" href="/icons/icon-256.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
 
 <!-- iOS/Apple -->
-<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Smart Budget">
@@ -80,7 +79,7 @@ ul.clean{margin:0;padding-left:18px}
 
   <!-- Header -->
   <header class="row">
-    <img src="/icon-192.png" class="logo" alt="logo">
+    <img src="/icons/icon-192.png" class="logo" alt="logo">
     <div class="title">Smart Budget & Commitments</div>
     <span class="right"></span>
     <button class="ghost" id="btn-theme">🌙/☀️</button>
@@ -200,7 +199,7 @@ ul.clean{margin:0;padding-left:18px}
     </div>
   </section>
 
-  <!-- ===== PAYMENTS (logs) ===== -->
+  <!-- ===== PAYMENTS ===== -->
   <section id="tab-payments" class="grid">
     <div class="card">
       <div class="h2">Payments</div>
@@ -224,7 +223,10 @@ ul.clean{margin:0;padding-left:18px}
       <div class="h2">Commitments (Fixed)</div>
       <div class="row">
         <input id="c_name" placeholder="Commitment name" style="flex:2">
-        <select id="c_cat" style="width:260px"></select>
+        <!-- نص حر مع اقتراحات -->
+        <input id="c_cat" list="catlist" placeholder="Category (e.g. Rent, Internet…)" style="width:260px">
+        <datalist id="catlist"></datalist>
+
         <input id="c_amount" type="number" step="0.01" placeholder="Monthly">
         <input id="c_due" type="date">
         <button id="btnAddC">+ Add</button>
@@ -260,28 +262,6 @@ ul.clean{margin:0;padding-left:18px}
     </div>
   </section>
 
-  <!-- ===== EVENTS ===== -->
-  <section id="tab-events" class="grid">
-    <div class="card">
-      <div class="h2">Events & Gifts</div>
-      <div class="row">
-        <input id="ev_name" placeholder="Event (e.g. Mom's Birthday)" style="flex:2">
-        <select id="ev_type"><option>Birthday</option><option>Anniversary</option><option>Holiday</option><option>Gift</option><option>Other</option></select>
-        <input id="ev_date" type="date">
-        <input id="ev_amt" type="number" step="0.01" placeholder="Planned spend">
-      </div>
-      <div class="row" style="margin-top:8px">
-        <label class="chip"><input type="checkbox" id="ev_toCommit" style="margin-right:8px">Add to Commitments</label>
-        <textarea id="ev_notes" placeholder="Notes…" style="flex:1"></textarea>
-        <button id="btnAddEV">+ Add Event</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="row"><div class="h2" style="margin:0">Planner</div><div class="right muted">Next in: <span id="ev_next">—</span> | Gifts budget: <span id="ev_gifts">0.00</span></div></div>
-      <table id="ev_table"><thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminder</th><th>Notes</th><th></th></tr></thead><tbody></tbody></table>
-    </div>
-  </section>
-
   <!-- ===== NOTES ===== -->
   <section id="tab-notes" class="grid">
     <div class="card">
@@ -310,7 +290,7 @@ const firebaseConfig = {
   projectId: "smart-budget-61664",
   storageBucket: "smart-budget-61664.appspot.com",
   messagingSenderId: "273780649075",
-  appId: "1:273780649075:web:c0c08d6d56f5085e9e0e06"
+  appId: "1:273780649075:web:c0c08d6d56f5085e9e06"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -328,7 +308,6 @@ OneSignalDeferred.push(async function(OneSignal) {
 });
 
 /* ===== Helpers/UI ===== */
-const $ = s => document.querySelector(s);
 const byId = id => document.getElementById(id);
 const setText = (id,t)=>{ const el=byId(id); if(el) el.textContent = t; };
 const fmt = (v)=> (byId('currency').value.split(' ')[0] || '€') + ' ' + Number(v||0).toFixed(2);
@@ -364,7 +343,8 @@ const FULL_CATEGORIES = [
 ];
 function fillSelect(sel, items){ sel.innerHTML = items.map(x=>`<option>${x}</option>`).join(''); }
 fillSelect(byId('e_cat'), FULL_CATEGORIES);
-fillSelect(byId('c_cat'), FULL_CATEGORIES);
+// اقتراحات الالتزامات (datalist)
+byId('catlist').innerHTML = FULL_CATEGORIES.map(x=>`<option value="${x}"></option>`).join('');
 
 /* ===== Inputs & buttons ===== */
 const nameEl=byId('userName'), currencyEl=byId('currency'), accentEl=byId('accent');
@@ -400,7 +380,37 @@ btnLogout.onclick = ()=> signOut(auth);
 
 /* ===== Firestore state ===== */
 let uid=null, userDocRef=null, userData=null;
-async function savePrefs(){ await updateDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } }); }
+
+async function savePrefs(){
+  try{
+    await ensureUserDoc();
+    await updateDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } });
+  }catch(err){ alert('Save prefs failed: '+(err?.message||err)); }
+}
+
+/* إنشاء المستند إن لم يوجد قبل أي تحديث */
+async function ensureUserDoc() {
+  if (!userDocRef) return;
+  const snap = await getDoc(userDocRef);
+  if (!snap.exists()) {
+    await setDoc(userDocRef, {
+      prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value },
+      budget:[], expenses:[], commitments:[], savings:[], payments:[], events:[], notes:''
+    }, { merge:true });
+  }
+}
+
+/* تحديث آمن مع رسائل خطأ واضحة */
+async function safeUpdateArray(key, item) {
+  try {
+    await ensureUserDoc();
+    await updateDoc(userDocRef, { [key]: arrayUnion(item) });
+  } catch (err) {
+    console.error(err);
+    alert('Saving failed: ' + (err?.message || err));
+    throw err;
+  }
+}
 
 /* ===== Helpers ===== */
 function daysUntil(dateISO){ return Math.ceil((new Date(dateISO).getTime()-Date.now())/86400000); }
@@ -537,16 +547,6 @@ function redrawEvents(){
   setText('ev_next', nextDays===null?'—':`${nextDays} day(s)`);
 }
 
-/* ===== Analysis ===== */
-function renderAnalysis(){
-  const exps = userData?.expenses||[];
-  setText('a_month_total', fmt(exps.reduce((a,x)=>a+Number(x.amount||0),0)));
-  setText('a_tx', exps.length);
-  const perCat={}; exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
-  const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
-  setText('a_top', top);
-}
-
 /* ===== Glue render ===== */
 function renderAll(){ renderKPIs(); redrawBudget(); redrawExpenses(); redrawCommitments(); redrawSavings(); redrawPayments(); redrawEvents(); renderAnalysis(); }
 
@@ -555,20 +555,20 @@ byId('btnAddB').onclick = async ()=>{
   if(!uid) return alert('Sign in first.');
   const item = { id:crypto.randomUUID(), item:byId('b_item').value, type:byId('b_type').value, amount:Number(byId('b_amt').value||0) };
   if(!item.item || !item.amount) return alert('Enter item & amount');
-  await updateArray('budget', item);
+  await safeUpdateArray('budget', item);
   byId('b_item').value=''; byId('b_amt').value='';
 };
 byId('btnAddE').onclick = async ()=>{
   if(!uid) return alert('Sign in first.');
   const it = { id:crypto.randomUUID(), date:byId('e_date').value||todayISO(), category:byId('e_cat').value, description:byId('e_desc').value||'', amount:Number(byId('e_amt').value||0), method:byId('e_method').value };
   if(!it.amount) return alert('Amount?');
-  await updateArray('expenses', it); byId('e_desc').value=''; byId('e_amt').value='';
+  await safeUpdateArray('expenses', it); byId('e_desc').value=''; byId('e_amt').value='';
 };
 byId('btnAddC').onclick = async ()=>{
   if(!uid) return alert('Sign in first.');
   const it = { id:crypto.randomUUID(), name:byId('c_name').value, category:byId('c_cat').value, amount:Number(byId('c_amount').value||0), due:byId('c_due').value, status:"Pending", remind:byId('c_remind').checked, remindDays:Number(byId('c_remindWhen').value) };
   if(!it.name || !it.amount || !it.due) return alert('Enter name, amount, due');
-  await updateArray('commitments', it);
+  await safeUpdateArray('commitments', it);
   if(it.remind){
     const when = new Date(it.due); when.setDate(when.getDate()-it.remindDays);
     scheduleLocalReminder({ id:it.id, title:'Commitment Reminder', body:`${it.name} due ${it.due} (${fmt(it.amount)})`, fireAt:when.getTime() });
@@ -583,9 +583,9 @@ byId('btnAddS').onclick = async ()=>{
   byId('s_end').value=end;
   const monthly = target/months;
   const it = { id:crypto.randomUUID(), name, category:cat, target, months, monthly, start, end, saved:0 };
-  await updateArray('savings', it);
+  await safeUpdateArray('savings', it);
   if(byId('s_toCommit').checked){
-    await updateArray('commitments', { id:crypto.randomUUID(), name:`Saving – ${name}`, category:'Savings / Investments', amount:monthly, due:start, status:'Pending', remind:true, remindDays:7 });
+    await safeUpdateArray('commitments', { id:crypto.randomUUID(), name:`Saving – ${name}`, category:'Savings / Investments', amount:monthly, due:start, status:'Pending', remind:true, remindDays:7 });
   }
   byId('s_name').value=''; byId('s_target').value=''; byId('s_months').value='';
 };
@@ -593,47 +593,50 @@ byId('btnAddP').onclick = async ()=>{
   if(!uid) return alert('Sign in first.');
   const it = { id:crypto.randomUUID(), type:byId('p_type').value, ref:byId('p_ref').value, amount:Number(byId('p_amt').value||0), date:byId('p_date').value||todayISO() };
   if(!it.amount || !it.ref) return alert('Ref & amount required');
-  await updateArray('payments', it); byId('p_ref').value=''; byId('p_amt').value='';
+  await safeUpdateArray('payments', it); byId('p_ref').value=''; byId('p_amt').value='';
 };
 byId('btnAddEV').onclick = async ()=>{
   if(!uid) return alert('Sign in first.');
   const name=byId('ev_name').value, type=byId('ev_type').value, date=byId('ev_date').value, planned=Number(byId('ev_amt').value||0), notes=byId('ev_notes').value||'';
   if(!name||!date) return alert('Event name & date required');
   const it = { id:crypto.randomUUID(), eventName:name, eventType:type, eventDate:date, planned, notes };
-  await updateArray('events', it);
+  await safeUpdateArray('events', it);
   if(byId('ev_toCommit').checked && planned>0){
-    await updateArray('commitments', { id:crypto.randomUUID(), name:`Gift – ${name}`, category:'Gifts & Celebrations', amount:planned, due:date, status:'Pending', remind:true, remindDays:7 });
+    await safeUpdateArray('commitments', { id:crypto.randomUUID(), name:`Gift – ${name}`, category:'Gifts & Celebrations', amount:planned, due:date, status:'Pending', remind:true, remindDays:7 });
   }
   byId('ev_name').value=''; byId('ev_amt').value=''; byId('ev_notes').value='';
 };
 byId('btnSaveNotes').onclick = async ()=>{
   if(!uid) return alert('Sign in first.');
-  await updateDoc(userDocRef, { notes: byId('notes').value||'' });
-  alert('Notes saved.');
+  try{ await ensureUserDoc(); await updateDoc(userDocRef, { notes: byId('notes').value||'' }); alert('Notes saved.'); }
+  catch(err){ alert('Save notes failed: '+(err?.message||err)); }
 };
 
 /* ===== Row helpers ===== */
 async function rowActionCommit(act,id){
-  if(act==='paid'){
-    const list = (userData.commitments||[]).map(x=> x.id===id? {...x, status:'Paid'}:x );
-    await updateDoc(userDocRef,{ commitments:list });
-  } else if(act==='del'){ await delRow('commitments', id); }
+  try{
+    if(act==='paid'){
+      const list = (userData.commitments||[]).map(x=> x.id===id? {...x, status:'Paid'}:x );
+      await updateDoc(userDocRef,{ commitments:list });
+    } else if(act==='del'){ await delRow('commitments', id); }
+  }catch(err){ alert('Action failed: '+(err?.message||err)); }
 }
 async function delRow(collectionKey, id){
-  const list = (userData[collectionKey]||[]).filter(x=>x.id!==id);
-  await updateDoc(userDocRef, { [collectionKey]: list });
-}
-async function updateArray(key, item){
-  const docSnap = await getDoc(userDocRef);
-  if(!docSnap.exists()) await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } });
-  await updateDoc(userDocRef, { [key]: arrayUnion(item) });
+  try{
+    const list = (userData[collectionKey]||[]).filter(x=>x.id!==id);
+    await updateDoc(userDocRef, { [collectionKey]: list });
+  }catch(err){ alert('Delete failed: '+(err?.message||err)); }
 }
 
-/* ===== Auto calc saving end ===== */
-byId('s_start').addEventListener('change', ()=>{
-  const months = Number(byId('s_months').value||0); if(!months) return;
-  const s = new Date(byId('s_start').value); s.setMonth(s.getMonth()+months); byId('s_end').value = s.toISOString().slice(0,10);
-});
+/* ===== Analysis ===== */
+function renderAnalysis(){
+  const exps = userData?.expenses||[];
+  setText('a_month_total', fmt(exps.reduce((a,x)=>a+Number(x.amount||0),0)));
+  setText('a_tx', exps.length);
+  const perCat={}; exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
+  const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+  setText('a_top', top);
+}
 
 /* ===== Auth listener ===== */
 onAuthStateChanged(auth, async (user)=>{
@@ -641,10 +644,7 @@ onAuthStateChanged(auth, async (user)=>{
     uid = user.uid;
     btnGoogle.style.display='none'; btnLogout.style.display='';
     userDocRef = doc(db,'users',uid);
-    const snap = await getDoc(userDocRef);
-    if(!snap.exists()){
-      await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value }, budget:[], expenses:[], commitments:[], savings:[], payments:[], events:[], notes:'' });
-    }
+    await ensureUserDoc();
     onSnapshot(userDocRef,(s)=>{
       userData = s.data() || {};
       const p = userData.prefs||{};
@@ -662,6 +662,10 @@ onAuthStateChanged(auth, async (user)=>{
 /* ===== Initial show ===== */
 document.querySelectorAll('section[id^="tab-"]').forEach((s,i)=> s.style.display = i? 'none':'grid');
 renderAll();
+
+/* (اختياري) التبليغ عن أي خطأ عام ليسهل التشخيص */
+window.addEventListener('unhandledrejection', e => alert('Error: ' + (e.reason?.message || e.reason)));
+window.addEventListener('error', e => { if (!/ResizeObserver/.test(e.message||'')) alert('Error: ' + e.message); });
 </script>
 </body>
-</html>
+  </html>
