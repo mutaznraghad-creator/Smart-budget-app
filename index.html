@@ -6,22 +6,23 @@
 <title>Smart Budget & Commitments Dashboard</title>
 
 <!-- PWA manifest + icons -->
-<link rel="manifest" href="/Manifest.webmanifest">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0f1f39"/>
 
-<!-- Favicon (classic) -->
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
-<link rel="icon" type="image/png" sizes="64x64" href="/icons/icon-64.png">
-<link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128.png">
+<!-- Favicon (classic) - files are in the project ROOT -->
+<link rel="icon" type="image/png" sizes="16x16"  href="/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32"  href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="64x64"   href="/icon-64.png">
+<link rel="icon" type="image/png" sizes="128x128" href="/icon-128.png">
 
 <!-- PWA icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="256x256" href="/icons/icon-256.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+<link rel="icon" type="image/png" sizes="180x180" href="/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="256x256" href="/icon-256.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 
 <!-- iOS/Apple -->
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Smart Budget">
@@ -79,7 +80,7 @@ ul.clean{margin:0;padding-left:18px}
 
   <!-- Header -->
   <header class="row">
-    <img src="/icons/icon-192.png" class="logo" alt="logo">
+    <img src="/icon-192.png" class="logo" alt="logo">
     <div class="title">Smart Budget & Commitments</div>
     <span class="right"></span>
     <button class="ghost" id="btn-theme">🌙/☀️</button>
@@ -309,7 +310,7 @@ const firebaseConfig = {
   projectId: "smart-budget-61664",
   storageBucket: "smart-budget-61664.appspot.com",
   messagingSenderId: "273780649075",
-  appId: "1:273780649075:web:c0c08d6d56f5085e9e06"
+  appId: "1:273780649075:web:c0c08d6d56f5085e9e0e06"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -663,4 +664,4 @@ document.querySelectorAll('section[id^="tab-"]').forEach((s,i)=> s.style.display
 renderAll();
 </script>
 </body>
-  </html>
+</html>
