@@ -1,774 +1,653 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Smart Budget</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Smart Budget & Commitments Dashboard</title>
 
-  <!-- PWA Manifest (يتولد داخل الصفحة ويُسجَّل آليًا) -->
-  <link id="manifestLink" rel="manifest">
+<link rel="manifest" href="/Manifest.webmanifest">
+<meta name="theme-color" content="#0f1f39"/>
 
-  <meta name="theme-color" content="#0e2a44"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"/>
 
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-
-  <!-- Firebase (CDN) -->
-  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
-  <style>
-    :root{
-      --bg:#f6f7f9;--card:#fff;--ink:#24364a;--muted:#6c7a89;
-      --brand:#2c74ff;--sand:#e9e2d3;--sage:#cfe1d5;--blue:#d9e6ff;
-      --ok:#1bbf74;--warn:#ffb200;--bad:#ff6b6b;--soft:#e9eef6;
-      --shadow:0 10px 26px rgba(25,42,70,.07);
-    }
-    [data-theme="dark"]{
-      --bg:#0f1720;--card:#111b27;--ink:#f5f7fb;--muted:#9fb0c2;
-      --brand:#5ea1ff;--sand:#3b3a31;--sage:#2d3a33;--blue:#21314a;
-      --soft:#1b2633;--shadow:0 10px 26px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;
-      background:var(--bg);color:var(--ink)}
-    .wrap{max-width:1100px;padding:18px;margin:0 auto}
-    header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-    .logo{display:flex;align-items:center;gap:10px}
-    .logo-badge{width:36px;height:36px;border-radius:12px;background:#0e2a44;
-      display:grid;place-items:center;box-shadow:var(--shadow)}
-    .logo-badge svg{width:22px;height:22px;fill:#f0c766}
-    h1{margin:0;font-size:28px;letter-spacing:.3px}
-    .toolbar{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-    .input,.btn,select{border:1px solid transparent;background:var(--card);
-      color:var(--ink);border-radius:12px;padding:10px 14px;height:44px;
-      box-shadow:var(--shadow)}
-    .btn{background:#2c74ff;color:#fff;border:none;font-weight:600}
-    .btn.ghost{background:var(--card);color:var(--ink)}
-    .tabs{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
-    .tab{padding:10px 16px;border-radius:12px;background:var(--soft);color:var(--ink);
-      cursor:pointer;border:1px solid transparent}
-    .tab.active{background:#2c74ff;color:#fff}
-    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin:14px 0}
-    .grid{display:grid;gap:12px}
-    @media(min-width:820px){.grid-2{grid-template-columns:1fr 1fr}}
-    .stat{display:flex;align-items:center;justify-content:space-between}
-    .muted{color:var(--muted);font-size:14px}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid rgba(140,150,170,.15)}
-    th{text-align:left;color:var(--muted);font-weight:600}
-    .pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
-    .ok{background:rgba(27,191,116,.12);color:#11a364}
-    .warn{background:rgba(255,178,0,.16);color:#c58900}
-    .bad{background:rgba(255,107,107,.16);color:#c84d4d}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    .grow{flex:1}
-    .hint{font-size:12px;color:var(--muted)}
-    .right{margin-left:auto}
-    .toggle{display:flex;align-items:center;gap:8px}
-    .select-like{position:relative}
-    .select-like select{appearance:none;padding-right:34px}
-    .select-like:after{
-      content:"▾";position:absolute;right:10px;top:10px;color:var(--muted)}
-  </style>
+<style>
+:root{
+  --bg:#f5f6fa; --card:#fff; --ink:#111827;
+  --brand:#3157E0; --muted:#6b7280; --soft:#e8ecf8;
+  --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --ring:#d1d5db;
+}
+[data-theme="dark"]{
+  --bg:#0b1220; --card:#111827; --ink:#e5ecff;
+  --brand:#6c8bff; --muted:#98a2b3; --soft:#1a2440; --ring:#2a3347;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1160px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.logo{width:36px;height:36px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.title{font-weight:800;font-size:28px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:var(--card);border:1px solid var(--ring)}
+input,select,button,textarea{font:inherit}
+input,select,textarea{height:40px;padding:8px 10px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--ink)}
+textarea{height:auto;min-height:110px;resize:vertical}
+button{height:42px;padding:10px 14px;border-radius:14px;border:0;background:var(--brand);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(49,87,224,.25)}
+button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--ring);box-shadow:none}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+nav button{background:#e8efff;color:#0f2a7a;border:0}
+nav button.active{background:var(--brand);color:#fff}
+.card{background:var(--card);border:1px solid var(--ring);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:16px}
+.h2{font-size:20px;font-weight:800;margin:4px 0 12px}
+.grid{display:grid;gap:12px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.kpi{display:grid;gap:8px}
+.kpi .big{font-size:30px;font-weight:800}
+blockquote{margin:0;padding:12px;border-radius:12px;background:#eef4ff;border:1px dashed #cfd9ff;color:#0f2a7a}
+.muted{color:var(--muted)} .right{margin-left:auto}
+table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid var(--ring);vertical-align:top}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;font-size:12px}
+.paid{background:#dcfce7;color:#166534} .soon{background:#fff7ed;color:#9a3412} .over{background:#fee2e2;color:#991b1b} .pend{background:#e5edff;color:#1e3a8a}
+.progress{height:12px;background:#edf1fb;border-radius:999px;overflow:hidden} .progress>i{display:block;height:100%;background:var(--brand);width:0}
+.small{font-size:12px}
+.badge{padding:4px 8px;border-radius:8px;border:1px solid var(--ring);background:var(--card)}
+.sep{height:1px;background:var(--ring);margin:8px 0}
+ul.clean{margin:0;padding-left:18px}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">
-        <div class="logo-badge" aria-hidden="true">
-          <!-- أيقونة المحفظة + المخطط + العدسة + الصح -->
-          <svg viewBox="0 0 24 24">
-            <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H16l.6 1.8H6a2 2 0 0 0-2 2v8.2A2 2 0 0 0 6 19h11a2 2 0 0 0 2-2v-4h-4.3a2.7 2.7 0 1 1 0-5.4H19a2 2 0 0 1 2 2V17a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V9.5Z"/>
-          </svg>
-        </div>
-        <h1>Smart Budget</h1>
-      </div>
+<div class="wrap" id="app">
 
-      <div class="toolbar">
-        <input id="nameInput" class="input" placeholder="Your name"/>
-        <div class="select-like"><select id="currencySel" class="input">
-          <option value="€">€ EUR</option><option value="$">$ USD</option><option value="£">£ GBP</option>
-        </select></div>
-        <div class="select-like"><select id="themeSel" class="input">
-          <option value="Blue">Blue</option><option value="Sage">Sage</option><option value="Sand">Sand</option>
-        </select></div>
-        <button id="googleBtn" class="btn">Sign in with Google</button>
-        <button id="notifBtn" class="btn ghost">Enable Notifications 🔔</button>
-        <div class="toggle">
-          <label class="muted">Dark</label>
-          <input type="checkbox" id="darkToggle">
-        </div>
-      </div>
-    </header>
+  <!-- Header -->
+  <header class="row">
+    <img src="/icons/icon-192.png" class="logo" alt="logo">
+    <div class="title">Smart Budget & Commitments</div>
+    <span class="right"></span>
+    <button class="ghost" id="btn-theme">🌙/☀️</button>
+  </header>
 
-    <nav class="tabs" id="tabs">
-      <button data-tab="dash" class="tab active">Dashboard</button>
-      <button data-tab="commit" class="tab">Commitments</button>
-      <button data-tab="exp" class="tab">Expenses</button>
-      <button data-tab="save" class="tab">Savings</button>
-      <button data-tab="events" class="tab">Events</button>
-      <button data-tab="notes" class="tab">Notes</button>
-      <button data-tab="analysis" class="tab">Analysis</button>
-    </nav>
-
-    <!-- Dashboard -->
-    <section id="dash" class="card">
-      <h2>Welcome, <span id="welcomeName">Guest</span> 👋</h2>
-      <div class="card muted" style="margin-top:10px">
-        “Track your money. Master your life.”
-      </div>
-      <div class="grid grid-2">
-        <div class="card">
-          <div class="stat">
-            <div>
-              <div class="muted">Total Balance</div>
-              <div id="statBalance" style="font-size:28px;font-weight:800">€ 0.00</div>
-              <div class="hint">Income − Out</div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="stat">
-            <div>
-              <div class="muted">Total Expenses (month)</div>
-              <div id="statExp" style="font-size:28px;font-weight:800">€ 0.00</div>
-              <div class="hint">variable</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="muted">% Commitments Paid</div>
-        <progress id="paidProg" max="100" value="0" style="width:100%;height:12px"></progress>
-        <div class="hint" id="paidHint">0% (0/0)</div>
-      </div>
-      <div class="card">
-        <div class="muted">Next Event</div>
-        <div id="nextEvent">—</div>
-      </div>
-    </section>
-
-    <!-- Commitments -->
-    <section id="commit" class="card" hidden>
-      <h2>Commitments (Fixed Payments)</h2>
-      <div class="row">
-        <input id="cName" class="input grow" placeholder="Commitment name"/>
-        <div class="select-like grow">
-          <select id="cCat" class="input">
-            <option>Rent / Mortgage</option><option>Electricity</option><option>Water</option>
-            <option>Internet & Phone</option><option>Insurance</option><option>Gym / Fitness</option>
-            <option>Healthcare / Medicine</option><option>Subscriptions</option><option>Gifts & Celebrations</option>
-            <option>Taxes & Fees</option><option>Savings / Investments</option><option>Miscellaneous</option>
-          </select>
-        </div>
-        <input id="cMonthly" class="input" type="number" step="0.01" placeholder="Monthly amount"/>
-        <input id="cDue" class="input" type="date"/>
-        <button id="cAdd" class="btn">+ Add</button>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <div class="muted">Legend:</div>
-        <span class="pill ok">Paid</span>
-        <span class="pill warn">Due ≤3d</span>
-        <span class="pill bad">Overdue</span>
-        <span class="right muted">Total: <b id="cTotal">€ 0.00</b></span>
-      </div>
-
-      <div class="card">
-        <table id="cTable">
-          <thead><tr>
-            <th>Name</th><th>Category</th><th>Monthly</th><th>Due</th><th>Status</th><th>Notes</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="muted" id="nextDue">Next due in — days</div>
-    </section>
-
-    <!-- Expenses -->
-    <section id="exp" class="card" hidden>
-      <h2>Expenses (Variable)</h2>
-      <div class="row">
-        <input id="eDate" class="input" type="date"/>
-        <div class="select-like"><select id="eCat" class="input">
-          <option>Groceries</option><option>Coffee & Snacks</option><option>Dining Out</option>
-          <option>Household Supplies</option><option>Fuel / Gas</option><option>Public Transport</option>
-          <option>Car Maintenance</option><option>Healthcare / Medicine</option><option>Personal Care</option>
-          <option>Clothing & Accessories</option><option>Entertainment</option><option>Hobbies & Subscriptions</option>
-          <option>Courses & Learning</option><option>Books & Materials</option><option>Work Expenses</option>
-          <option>Software & Apps</option><option>Savings / Investments</option>
-          <option>Travel</option><option>Accommodation</option><option>Activities & Tickets</option>
-          <option>Donations & Charity</option><option>Taxes & Fees</option><option>Miscellaneous</option>
-        </select></div>
-        <input id="eDesc" class="input grow" placeholder="Description"/>
-        <input id="eAmt" class="input" type="number" step="0.01" placeholder="Amount"/>
-        <div class="select-like"><select id="eMethod" class="input">
-          <option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option>
-        </select></div>
-        <button id="eAdd" class="btn">+ Add</button>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <span class="muted">Total: <b id="eTotal">€ 0.00</b></span>
-        <span class="muted">Top 3: <b id="eTop">—</b></span>
-        <span class="muted right">Avg/day: <b id="eAvg">€ 0.00</b></span>
-      </div>
-
-      <div class="card">
-        <table id="eTable">
-          <thead><tr>
-            <th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Method</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Savings -->
-    <section id="save" class="card" hidden>
-      <h2>Saving Plans</h2>
-      <div class="row">
-        <input id="sName" class="input grow" placeholder="Goal name"/>
-        <div class="select-like"><select id="sCat" class="input">
-          <option>Vacation</option><option>Wedding</option><option>Investment</option><option>Other</option>
-        </select></div>
-        <input id="sTarget" class="input" type="number" step="0.01" placeholder="Target amount"/>
-        <input id="sMonths" class="input" type="number" min="1" placeholder="Duration (months)"/>
-        <input id="sStart" class="input" type="date"/>
-        <input id="sEnd" class="input" type="date"/>
-        <label class="input" style="display:flex;align-items:center;gap:8px">
-          <input type="checkbox" id="sToCommit"> Add to Commitments
-        </label>
-        <button id="sAdd" class="btn">+ Add</button>
-      </div>
-      <div class="card">
-        <table id="sTable">
-          <thead><tr>
-            <th>Goal</th><th>Category</th><th>Target</th><th>Months</th><th>Monthly</th><th>Period</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Events -->
-    <section id="events" class="card" hidden>
-      <h2>Events & Gifts</h2>
-      <div class="row">
-        <input id="vName" class="input grow" placeholder="Event name"/>
-        <div class="select-like"><select id="vType" class="input">
-          <option>Birthday</option><option>Wedding</option><option>Holiday</option>
-          <option>Gift</option><option>Other</option>
-        </select></div>
-        <input id="vDate" class="input" type="date"/>
-        <input id="vSpend" class="input" type="number" step="0.01" placeholder="Planned Spending"/>
-        <label class="input" style="display:flex;align-items:center;gap:8px">
-          <input type="checkbox" id="vToCommit"> Add to Commitments
-        </label>
-        <button id="vAdd" class="btn">+ Add</button>
-      </div>
-      <div class="hint" style="margin-top:6px">
-        Reminder colors: ≤30d (blue) · ≤7d (orange) · ≤3d (red) · past (gray)
-      </div>
-      <div class="card">
-        <table id="vTable">
-          <thead><tr>
-            <th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminders</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Notes -->
-    <section id="notes" class="card" hidden>
-      <h2>Notes</h2>
-      <textarea id="notesArea" class="input" style="width:100%;height:200px" placeholder="Write anything here..."></textarea>
-      <div class="hint">Autosaves locally & syncs to cloud when signed in.</div>
-    </section>
-
-    <!-- Analysis -->
-    <section id="analysis" class="card" hidden>
-      <h2>Analysis</h2>
-      <div class="grid grid-2">
-        <div class="card">
-          <h3>Monthly by Category</h3>
-          <canvas id="chart1" height="220"></canvas>
-        </div>
-        <div class="card">
-          <h3>Commitments Paid %</h3>
-          <canvas id="chart2" height="220"></canvas>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Helper formulas (Google Sheets)</h3>
-        <ul class="muted">
-          <li>Days to Event: <code>= [Event_Date] - TODAY()</code></li>
-          <li>Months to Save: <code>=DATEDIF([Start_Date],[End_Date],"M")+1</code></li>
-          <li>Monthly Contribution: <code>=ROUNDUP([Target]/[Months],2)</code></li>
-          <li>Status: <code>=IF([Paid]>=[Amount],"Paid",IF([Due]&lt;TODAY(),"Overdue",IF([Due]-TODAY()&lt;=3,"Due Soon","Pending")))</code></li>
-          <li>SUM per category: <code>=SUMIF([Category],[X],[Amount])</code></li>
-        </ul>
-      </div>
-    </section>
+  <!-- Quick prefs -->
+  <div class="row">
+    <input id="userName" class="chip" placeholder="Your name"/>
+    <select id="currency" class="chip">
+      <option>€ EUR</option><option>$ USD</option><option>£ GBP</option><option>SAR</option>
+    </select>
+    <select id="accent" class="chip"><option>Blue</option><option>Sage</option><option>Sand</option></select>
+    <button id="btnGoogle" class="chip" style="background:#f5c26b;color:#3a2a00">Sign in with Google</button>
+    <button id="btnNotify" class="chip">Enable Notifications 🔔</button>
+    <button id="btnLogout" class="chip ghost" style="display:none">Logout</button>
   </div>
 
-  <!-- Chart.js (للاختصاره نستخدم نسخة خفيفة) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Nav (9 tabs) -->
+  <nav id="tabs">
+    <button data-tab="dash" class="active">Dashboard</button>
+    <button data-tab="budget">Budget</button>
+    <button data-tab="expense">Expenses</button>
+    <button data-tab="savings">Savings</button>
+    <button data-tab="payments">Payments</button>
+    <button data-tab="commit">Commitments</button>
+    <button data-tab="analysis">Analysis</button>
+    <button data-tab="events">Events</button>
+    <button data-tab="notes">Notes</button>
+  </nav>
 
-  <script>
-  // =============== تهيئة بسيطة لحفظ الحالة ===============
-  const $ = (q, p=document) => p.querySelector(q);
-  const $$ = (q, p=document) => [...p.querySelectorAll(q)];
-  const state = {
-    user:null, currency:"€", themeAccent:"Blue", dark:false, name:"",
-    commitments:[], expenses:[], savings:[], events:[], notes:""
+  <!-- ===== DASHBOARD ===== -->
+  <section id="tab-dash" class="grid grid-2">
+    <div class="card">
+      <div class="h2" id="welcome">Welcome, Guest 👋</div>
+      <blockquote>“Track your money. Master your life.”</blockquote>
+      <div class="grid grid-3" style="margin-top:10px">
+        <div class="card kpi"><div class="muted small">Total Balance</div><div class="big" id="kpi-balance">€ 0.00</div></div>
+        <div class="card kpi"><div class="muted small">Total Expenses (month)</div><div class="big" id="kpi-exp">€ 0.00</div></div>
+        <div class="card kpi">
+          <div class="row"><div class="muted small">% Commitments Paid</div><div class="right small" id="kpi-paid-count">0/0</div></div>
+          <div class="progress"><i id="kpi-paid"></i></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <div class="row"><div><b>Next Event</b></div><div class="right muted small" id="kpi-next-event">—</div></div>
+        <div class="row"><div><b>Next Due</b></div><div class="right muted small" id="kpi-next-due">—</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="h2">This Month Snapshot</div>
+      <div class="row">
+        <span class="badge">Top categories: <b id="dash-top3">—</b></span>
+        <span class="badge">Daily avg: <b id="dash-daily">—</b></span>
+      </div>
+      <div class="sep"></div>
+      <div class="small muted">Recent expenses</div>
+      <ul id="dash-recent" class="clean small muted"></ul>
+    </div>
+  </section>
+
+  <!-- ===== BUDGET ===== -->
+  <section id="tab-budget" class="grid">
+    <div class="card">
+      <div class="h2">Monthly Budget</div>
+      <div class="row">
+        <input id="b_item" placeholder="Item (e.g. Salary / Rent)"/>
+        <select id="b_type"><option value="income">Income</option><option value="fixed">Fixed</option><option value="variable">Variable</option></select>
+        <input id="b_amt" type="number" step="0.01" placeholder="Amount"/>
+        <button id="btnAddB">+ Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="h2" style="margin:0">Items</div><div class="right muted">Totals: <span id="b_totals">—</span></div></div>
+      <table id="b_table"><thead><tr><th>Item</th><th>Type</th><th>Amount</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ===== EXPENSES ===== -->
+  <section id="tab-expense" class="grid">
+    <div class="card">
+      <div class="h2">Expenses</div>
+      <div class="row">
+        <input id="e_date" type="date" style="width:160px">
+        <select id="e_cat" style="width:250px"></select>
+        <input id="e_desc" placeholder="Description" style="flex:1">
+        <input id="e_amt" type="number" step="0.01" placeholder="Amount" style="width:160px">
+        <select id="e_method" style="width:140px"><option>Card</option><option>Cash</option><option>Transfer</option><option>Other</option></select>
+        <button id="btnAddE">+ Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="h2" style="margin:0">History</div><div class="right muted">Total: <span id="e_total">0.00</span></div></div>
+      <table id="e_table"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Method</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ===== SAVINGS ===== -->
+  <section id="tab-savings" class="grid">
+    <div class="card">
+      <div class="h2">Saving Plans</div>
+      <div class="row">
+        <input id="s_name" placeholder="Goal name (Vacation…)" style="flex:2">
+        <select id="s_cat"><option>Vacation</option><option>Wedding</option><option>Investment</option><option>Other</option></select>
+        <input id="s_target" type="number" step="0.01" placeholder="Target">
+        <input id="s_months" type="number" step="1" placeholder="Months">
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="s_start" type="date">
+        <input id="s_end" type="date" readonly>
+        <label class="chip"><input type="checkbox" id="s_toCommit" style="margin-right:8px" checked>Add to Commitments</label>
+        <button id="btnAddS">+ Add Plan</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="h2" style="margin:0">Plans</div><div class="right muted">Total progress: <span id="s_total_prog">0%</span></div></div>
+      <table id="s_table"><thead><tr><th>Goal</th><th>Category</th><th>Target</th><th>Months</th><th>Monthly</th><th>Start</th><th>End</th><th>Progress</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ===== PAYMENTS (logs) ===== -->
+  <section id="tab-payments" class="grid">
+    <div class="card">
+      <div class="h2">Payments</div>
+      <div class="row">
+        <select id="p_type"><option>Commitment</option><option>Expense</option><option>Saving</option></select>
+        <input id="p_ref" placeholder="Reference (e.g. Rent June)">
+        <input id="p_amt" type="number" step="0.01" placeholder="Amount">
+        <input id="p_date" type="date">
+        <button id="btnAddP">+ Log Payment</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="h2" style="margin:0">History</div></div>
+      <table id="p_table"><thead><tr><th>Date</th><th>Type</th><th>Reference</th><th>Amount</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ===== COMMITMENTS ===== -->
+  <section id="tab-commit" class="grid">
+    <div class="card">
+      <div class="h2">Commitments (Fixed)</div>
+      <div class="row">
+        <input id="c_name" placeholder="Commitment name" style="flex:2">
+        <select id="c_cat" style="width:260px"></select>
+        <input id="c_amount" type="number" step="0.01" placeholder="Monthly">
+        <input id="c_due" type="date">
+        <button id="btnAddC">+ Add</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="c_remind" checked style="margin-right:8px">Auto-remind</label>
+        <select id="c_remindWhen" class="chip"><option value="30">30 days</option><option value="7">7 days</option><option value="3">3 days</option><option value="1">1 day</option></select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="h2" style="margin:0">List</div><div class="right muted">Total: <span id="c_total">0.00</span></div></div>
+      <table id="c_table"><thead><tr><th>Name</th><th>Category</th><th>Monthly</th><th>Due</th><th>Status</th><th>Reminder</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ===== ANALYSIS ===== -->
+  <section id="tab-analysis" class="grid">
+    <div class="card">
+      <div class="h2">Spending Analysis</div>
+      <div class="row">
+        <span class="badge">Expenses this month: <b id="a_month_total">—</b></span>
+        <span class="badge">Top category: <b id="a_top">—</b></span>
+        <span class="badge">Transactions: <b id="a_tx">0</b></span>
+      </div>
+      <div class="sep"></div>
+      <div class="small muted">Helper formulas (Google Sheets):</div>
+      <ul class="small muted clean">
+        <li>Days to Event: <code>= [Event_Date]-TODAY()</code></li>
+        <li>Months to Save: <code>=DATEDIF([Start_Date],[End_Date],"M")+1</code></li>
+        <li>Monthly Contr.: <code>=ROUNDUP([Target]/[Months],2)</code></li>
+        <li>Status: <code>=IF(Paid>=Amount,"Paid",IF(Due<TODAY(),"Overdue",IF(Due-TODAY()<=3,"Due Soon","Pending")))</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== EVENTS ===== -->
+  <section id="tab-events" class="grid">
+    <div class="card">
+      <div class="h2">Events & Gifts</div>
+      <div class="row">
+        <input id="ev_name" placeholder="Event (e.g. Mom's Birthday)" style="flex:2">
+        <select id="ev_type"><option>Birthday</option><option>Anniversary</option><option>Holiday</option><option>Gift</option><option>Other</option></select>
+        <input id="ev_date" type="date">
+        <input id="ev_amt" type="number" step="0.01" placeholder="Planned spend">
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="ev_toCommit" style="margin-right:8px">Add to Commitments</label>
+        <textarea id="ev_notes" placeholder="Notes…" style="flex:1"></textarea>
+        <button id="btnAddEV">+ Add Event</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="h2" style="margin:0">Planner</div><div class="right muted">Next in: <span id="ev_next">—</span> | Gifts budget: <span id="ev_gifts">0.00</span></div></div>
+      <table id="ev_table"><thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminder</th><th>Notes</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ===== NOTES ===== -->
+  <section id="tab-notes" class="grid">
+    <div class="card">
+      <div class="h2">Notes & Motivation</div>
+      <blockquote>“Track your money. Reach your goals.”</blockquote>
+      <textarea id="notes" placeholder="Write your financial goals, plans, and notes here…"></textarea>
+      <div class="row" style="margin-top:8px"><button id="btnSaveNotes">Save Notes</button><span class="muted small">Saved to your account.</span></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- OneSignal SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+<!-- Firebase (modular v10) + App logic -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ===== Firebase config (من مشروعك) ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCfnCTuunR_E15GQaPQyUbS2Fdj6XAYfUo",
+  authDomain: "smart-budget-61664.firebaseapp.com",
+  projectId: "smart-budget-61664",
+  storageBucket: "smart-budget-61664.appspot.com",
+  messagingSenderId: "273780649075",
+  appId: "1:273780649075:web:c0c08d6d56f5085e9e0e06"
+};
+
+const appFB = initializeApp(firebaseConfig);
+const auth = getAuth(appFB);
+const db = getFirestore(appFB);
+const provider = new GoogleAuthProvider();
+
+/* ===== OneSignal (App ID لك) ===== */
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: "5dbef29c-1d7a-403d-9399-b2566983cc30",
+    allowLocalhostAsSecureOrigin: true
+  });
+});
+/* ===== UI helpers ===== */
+const $ = s => document.querySelector(s);
+const byId = id => document.getElementById(id);
+const setText = (id,t)=>{ const el=byId(id); if(el) el.textContent = t; };
+const fmt = (v)=> (byId('currency').value.split(' ')[0] || '€') + ' ' + Number(v||0).toFixed(2);
+const todayISO = ()=> new Date().toISOString().slice(0,10);
+
+/* ===== Theme toggle ===== */
+const btnTheme = byId('btn-theme');
+const savedTheme = localStorage.getItem('sb_theme') || 'light';
+if(savedTheme==='dark') document.documentElement.setAttribute('data-theme','dark');
+btnTheme.onclick = ()=>{
+  const dark = document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme', dark?'':'dark');
+  localStorage.setItem('sb_theme', dark?'light':'dark');
+};
+
+/* ===== Tabs ===== */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('section[id^="tab-"]').forEach(sec=>sec.style.display='none');
+    byId('tab-'+b.dataset.tab).style.display = 'grid';
   };
-  const key = 'sb_v2';
+});
 
-  function loadLocal(){
-    try{
-      const s = JSON.parse(localStorage.getItem(key)||'{}');
-      Object.assign(state, s);
-    }catch{}
-  }
-  function saveLocal(){
-    localStorage.setItem(key, JSON.stringify(state));
-  }
+/* ===== Full categories ===== */
+const FULL_CATEGORIES = [
+  "Groceries","Coffee & Snacks","Dining Out","Household Supplies","Fuel / Gas","Public Transport","Car Maintenance",
+  "Rent / Mortgage","Electricity","Water","Internet & Phone","Home Maintenance","Healthcare / Medicine","Insurance",
+  "Gym / Fitness","Personal Care","Clothing & Accessories","Gifts & Celebrations","Entertainment","Hobbies & Subscriptions",
+  "Courses & Learning","Books & Materials","Work Expenses","Software & Apps","Savings / Investments",
+  "Travel","Accommodation","Activities & Tickets","Donations & Charity","Taxes & Fees","Miscellaneous"
+];
+function fillSelect(sel, items){ sel.innerHTML = items.map(x=>`<option>${x}</option>`).join(''); }
+fillSelect(byId('e_cat'), FULL_CATEGORIES);
+fillSelect(byId('c_cat'), FULL_CATEGORIES);
 
-  // =============== Firebase ===============
-  let app, auth, db;
-  window.addEventListener('load', async () => {
-    // بدّلي القيم أدناه بقيم مشروعك (من صفحة Project settings)
-    const firebaseConfig = {
-      apiKey: "REPLACE_ME",
-      authDomain: "REPLACE_ME.firebaseapp.com",
-      projectId: "REPLACE_ME",
-      storageBucket: "REPLACE_ME.appspot.com",
-      messagingSenderId: "REPLACE_ME",
-      appId: "REPLACE_ME"
-    };
-    app = firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
-  });
+/* ===== Inputs & buttons refs ===== */
+const nameEl=byId('userName'), currencyEl=byId('currency'), accentEl=byId('accent');
+const btnGoogle=byId('btnGoogle'), btnLogout=byId('btnLogout'), btnNotify=byId('btnNotify');
 
-  async function syncFromCloud(){
-    if(!state.user) return;
-    const doc = await db.collection('users').doc(state.user.uid).get();
-    if(doc.exists){
-      const cloud = doc.data();
-      // ندمج بدون فقد محلي
-      ['commitments','expenses','savings','events','notes','name','currency','themeAccent','dark'].forEach(k=>{
-        if(cloud[k]!==undefined) state[k]=cloud[k];
-      });
-      saveLocal(); renderAll();
-    }
-  }
-  async function syncToCloud(){
-    if(!state.user) return;
-    const payload = {
-      name:state.name,currency:state.currency,themeAccent:state.themeAccent,dark:state.dark,
-      commitments:state.commitments,expenses:state.expenses,savings:state.savings,
-      events:state.events,notes:state.notes, updatedAt: new Date()
-    };
-    await db.collection('users').doc(state.user.uid).set(payload,{merge:true});
-  }
-
-  // =============== OneSignal ===============
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal){
-    await OneSignal.init({
-      appId: "5dbef29c-1d7a-403d-9399-b2566983cc30",
-      notifyButton: { enable: false }
-    });
-    window.requestPush = () => OneSignal.Notifications.requestPermission();
-  });
-
-  // =============== PWA: manifest + ServiceWorker ===============
-  // نولّد manifest أيقونات أساسية (يمكن استبدال الروابط لاحقًا)
-  const icons = [
-    {src:"/icons/icon-192.png",sizes:"192x192",type:"image/png"},
-    {src:"/icons/icon-512.png",sizes:"512x512",type:"image/png"},
-    {src:"/icons/maskable-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}
-  ];
-  const manifest = {
-    name:"Smart Budget",
-    short_name:"SmartBudget",
-    start_url:"./",
-    display:"standalone",
-    background_color:"#0e2a44",
-    theme_color:"#0e2a44",
-    icons
-  };
-  const mURL = URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/json'}));
-  $('#manifestLink').setAttribute('href', mURL);
-
-  // sw بسيط للتخزين الأوفلاين
-  const swCode = `
-    const CACHE='sb-v2';
-    const ASSETS = ['/', './', 'index.html',
-      'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
-      'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'
-    ];
-    self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
-    self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});
-    self.addEventListener('fetch',e=>{
-      const req=e.request;
-      e.respondWith(caches.match(req).then(r=>r||fetch(req).then(res=>{
-        const copy=res.clone(); caches.open(CACHE).then(c=>c.put(req, copy)); return res;
-      }).catch(()=>r)));
-    });
-    // استقبال أمر عرض تنبيه محلي (عند فتح الموقع)
-    self.addEventListener('message',e=>{
-      const d=e.data||{};
-      if(d.type==='notify') self.registration.showNotification(d.title||'Reminder',{body:d.body||'',icon:d.icon||null});
-    });
-  `;
-  if('serviceWorker' in navigator){
-    const swURL = URL.createObjectURL(new Blob([swCode],{type:'text/javascript'}));
-    navigator.serviceWorker.register(swURL);
-  }
-
-  // =============== واجهة المستخدم & منطق الصفحات ===============
-  loadLocal();
-
-  // إعدادات عامة
-  const nameInput = $('#nameInput'), curSel = $('#currencySel'), themeSel = $('#themeSel'),
-        darkToggle = $('#darkToggle'), welcomeName = $('#welcomeName');
-
-  function applyTheme(){
-    document.documentElement.dataset.theme = state.dark ? 'dark' : 'light';
-    // تلوين ناعم حسب الـ accent (بشكل بسيط)
-    const map = {Blue:'var(--blue)', Sage:'var(--sage)', Sand:'var(--sand)'};
-    document.querySelectorAll('.tab:not(.active)').forEach(t=>t.style.background = getComputedStyle(document.documentElement).getPropertyValue('--soft'));
-    document.querySelectorAll('.card').forEach(c=>c.style.borderColor='transparent');
-    document.body.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg');
-  }
-
-  function bindBasics(){
-    nameInput.value = state.name||'';
-    curSel.value = state.currency||'€';
-    themeSel.value = state.themeAccent||'Blue';
-    darkToggle.checked = !!state.dark;
-    welcomeName.textContent = state.name || 'Guest';
-
-    nameInput.oninput = () => {state.name = nameInput.value; welcomeName.textContent = state.name||'Guest'; saveLocal(); syncToCloud()};
-    curSel.onchange = () => {state.currency = curSel.value; saveLocal(); renderAll(); syncToCloud()};
-    themeSel.onchange = () => {state.themeAccent = themeSel.value; saveLocal(); applyTheme(); syncToCloud()};
-    darkToggle.onchange = () => {state.dark = darkToggle.checked; saveLocal(); applyTheme(); syncToCloud()};
-    $('#notifBtn').onclick = () => window.requestPush && window.requestPush();
-  }
-
-  // تبويب
-  $$('#tabs .tab').forEach(t=>{
-    t.onclick = ()=> {
-      $$('#tabs .tab').forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      ['dash','commit','exp','save','events','notes','analysis'].forEach(id=>{
-        $('#'+id).hidden = id !== t.dataset.tab;
-      });
-      if(t.dataset.tab==='analysis') drawCharts();
-    }
-  });
-
-  // ===== Commitments =====
-  const cBody = $('#cTable tbody');
-  function renderCommitments(){
-    cBody.innerHTML = '';
-    let paid = 0, total = 0, soon = Infinity;
-    const today = new Date();
-    state.commitments.forEach((r,idx)=>{
-      total += (+r.amount||0);
-      const tr = document.createElement('tr');
-      const due = new Date(r.due);
-      const days = Math.ceil((due - today)/(1000*60*60*24));
-      let status = r.paid ? 'Paid' : (days < 0 ? 'Overdue' : (days<=3?'Due soon':'Pending'));
-      if(r.paid) paid++;
-      if(days>=0) soon = Math.min(soon, days);
-
-      tr.innerHTML = `
-        <td>${r.name||''}</td>
-        <td>${r.cat||''}</td>
-        <td>${fmt(r.amount)}</td>
-        <td>${r.due||''}</td>
-        <td>
-          <span class="pill ${r.paid?'ok':(days<0?'bad':(days<=3?'warn':''))}">${status}</span>
-          <label class="hint" style="margin-left:8px"><input type="checkbox" ${r.paid?'checked':''} data-idx="${idx}" class="cPaid"> Paid</label>
-        </td>
-        <td contenteditable data-idx="${idx}" class="cNote">${r.note||''}</td>
-        <td><button class="btn ghost cDel" data-idx="${idx}">✕</button></td>
-      `;
-      cBody.appendChild(tr);
-    });
-    $('#cTotal').textContent = fmt(total);
-    $('#nextDue').textContent = isFinite(soon) ? `Next due in ${soon} days` : 'Next due —';
-    // شريط في الداشبورد
-    const pct = state.commitments.length? Math.round(100*paid/state.commitments.length):0;
-    $('#paidProg').value = pct; $('#paidHint').textContent = `${pct}% (${paid}/${state.commitments.length})`;
-    saveLocal(); syncToCloud();
-  }
-  $('#cAdd').onclick = ()=>{
-    const r = {
-      name:$('#cName').value.trim(),
-      cat:$('#cCat').value,
-      amount:+$('#cMonthly').value||0,
-      due:$('#cDue').value,
-      paid:false,note:""
-    };
-    if(!r.name || !r.due) return alert('Please add name & due date');
-    state.commitments.push(r);
-    $('#cName').value=''; $('#cMonthly').value=''; $('#cDue').value='';
-    renderCommitments(); scheduleLocalReminders();
-  };
-  cBody.addEventListener('change',e=>{
-    if(e.target.classList.contains('cPaid')){
-      const i = +e.target.dataset.idx; state.commitments[i].paid = e.target.checked;
-      renderCommitments();
-    }
-  });
-  cBody.addEventListener('click',e=>{
-    if(e.target.classList.contains('cDel')){
-      const i = +e.target.dataset.idx; state.commitments.splice(i,1); renderCommitments();
-    }
-  });
-  cBody.addEventListener('input',e=>{
-    if(e.target.classList.contains('cNote')){
-      const i = +e.target.dataset.idx; state.commitments[i].note = e.target.textContent; saveLocal(); syncToCloud();
-    }
-  });
-
-  // ===== Expenses =====
-  const eBody = $('#eTable tbody');
-  $('#eDate').value = new Date().toISOString().slice(0,10);
-  $('#eAdd').onclick=()=>{
-    const r = {
-      date:$('#eDate').value, cat:$('#eCat').value, desc:$('#eDesc').value,
-      amt:+$('#eAmt').value||0, method:$('#eMethod').value
-    };
-    if(!r.date || !r.amt) return;
-    state.expenses.unshift(r);
-    $('#eDesc').value=''; $('#eAmt').value='';
-    renderExpenses();
-  };
-  function renderExpenses(){
-    eBody.innerHTML='';
-    let total=0; const byCat={}; let minD=Infinity,maxD=-Infinity, cnt=0;
-    state.expenses.forEach((r,i)=>{
-      total += r.amt; byCat[r.cat]=(byCat[r.cat]||0)+r.amt; cnt++;
-      const d=new Date(r.date).getTime(); minD=Math.min(minD,d); maxD=Math.max(maxD,d);
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${r.date}</td><td>${r.cat}</td><td>${r.desc||''}</td>
-        <td>${fmt(r.amt)}</td><td>${r.method}</td>
-        <td><button class="btn ghost eDel" data-idx="${i}">✕</button></td>
-      `;
-      eBody.appendChild(tr);
-    });
-    $('#eTotal').textContent = fmt(total);
-    const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k} (${fmt(v)})`).join(', ')||'—';
-    $('#eTop').textContent = top;
-    const days = isFinite(minD)&&isFinite(maxD)? Math.max(1, Math.round((maxD-minD)/(1000*60*60*24))+1) : 1;
-    $('#eAvg').textContent = fmt(total/days);
-    saveLocal(); syncToCloud(); updateStats();
-  }
-  eBody.addEventListener('click',e=>{
-    if(e.target.classList.contains('eDel')){
-      const i=+e.target.dataset.idx; state.expenses.splice(i,1); renderExpenses();
-    }
-  });
-
-  // ===== Savings =====
-  const sBody = $('#sTable tbody');
-  $('#sAdd').onclick=()=>{
-    const m = Math.max(1, +$('#sMonths').value||0);
-    const r = {
-      name:$('#sName').value.trim(), cat:$('#sCat').value, target:+$('#sTarget').value||0,
-      months:m, monthly: Math.ceil((+$('#sTarget').value||0)/m*100)/100,
-      start:$('#sStart').value, end:$('#sEnd').value, addToCommit: $('#sToCommit').checked
-    };
-    if(!r.name||!r.target||!m) return;
-    state.savings.push(r);
-    if(r.addToCommit){
-      state.commitments.push({
-        name:`Saving – ${r.name}`, cat:'Savings / Investments', amount:r.monthly,
-        due:r.end||new Date().toISOString().slice(0,10), paid:false, note:''
-      });
-    }
-    ['sName','sTarget','sMonths','sStart','sEnd'].forEach(id=>$('#'+id).value='');
-    $('#sToCommit').checked=false;
-    renderSavings(); renderCommitments();
-  };
-  function renderSavings(){
-    sBody.innerHTML='';
-    state.savings.forEach((r,i)=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${r.name}</td><td>${r.cat}</td><td>${fmt(r.target)}</td>
-        <td>${r.months}</td><td>${fmt(r.monthly)}</td>
-        <td>${r.start||''} → ${r.end||''}</td>
-        <td><button class="btn ghost sDel" data-idx="${i}">✕</button></td>
-      `;
-      sBody.appendChild(tr);
-    });
-    saveLocal(); syncToCloud();
-  }
-  sBody.addEventListener('click',e=>{
-    if(e.target.classList.contains('sDel')){
-      const i=+e.target.dataset.idx; state.savings.splice(i,1); renderSavings();
-    }
-  });
-
-  // ===== Events =====
-  const vBody = $('#vTable tbody');
-  $('#vAdd').onclick=()=>{
-    const r = {
-      name:$('#vName').value.trim(), type:$('#vType').value, date:$('#vDate').value,
-      planned:+$('#vSpend').value||0, addToCommit:$('#vToCommit').checked
-    };
-    if(!r.name||!r.date) return;
-    state.events.push(r);
-    if(r.addToCommit){
-      state.commitments.push({
-        name:`Gift – ${r.name}`, cat:'Gifts & Celebrations', amount:r.planned,
-        due:r.date, paid:false, note:''
-      });
-    }
-    ['vName','vSpend','vDate'].forEach(id=>$('#'+id).value='');
-    $('#vToCommit').checked=false;
-    renderEvents(); renderCommitments(); scheduleLocalReminders();
-  };
-  function renderEvents(){
-    vBody.innerHTML='';
-    const today = new Date();
-    let nextTxt='—', nextDelta=Infinity;
-    state.events.forEach((r,i)=>{
-      const d = new Date(r.date);
-      const delta = Math.ceil((d - today)/(1000*60*60*24));
-      let color='#9aa7b3';
-      if(delta<=30 && delta>7) color='#5fa8ff';
-      if(delta<=7 && delta>3) color='#ffb759';
-      if(delta<=3 && delta>=0) color='#ff6b6b';
-      if(delta>=0 && delta<nextDelta){nextDelta=delta; nextTxt=`${r.name} in ${delta} days`;}
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${r.name}</td><td>${r.type}</td><td>${r.date}</td>
-        <td>${fmt(r.planned)}</td>
-        <td><span class="pill" style="background:${color};color:#10223a">Reminder</span></td>
-        <td><button class="btn ghost vDel" data-idx="${i}">✕</button></td>
-      `;
-      vBody.appendChild(tr);
-    });
-    $('#nextEvent').textContent = nextTxt;
-    vBody.onclick = (e)=>{
-      if(e.target.classList.contains('vDel')){
-        const i=+e.target.dataset.idx; state.events.splice(i,1); renderEvents(); scheduleLocalReminders();
-      }
-    };
-    saveLocal(); syncToCloud();
-  }
-
-  // ===== Notes =====
-  $('#notesArea').addEventListener('input', e=>{
-    state.notes = e.target.value; saveLocal(); syncToCloud();
-  });
-
-  // ===== إحصائيات سريعة =====
-  function fmt(n){ return `${state.currency} ${(+n||0).toFixed(2)}`;}
-  function updateStats(){
-    const totalExp = state.expenses.reduce((a,b)=>a+(+b.amt||0),0);
-    $('#statExp').textContent = fmt(totalExp);
-    // balance مثال بسيط: (مدخلات غير موجودة، نفترض فقط -المصروفات)
-    $('#statBalance').textContent = fmt(-totalExp);
-  }
-
-  // ===== Charts =====
-  let ch1,ch2;
-  function drawCharts(){
-    const byCat={}; state.expenses.forEach(e=>byCat[e.cat]=(byCat[e.cat]||0)+(+e.amt||0));
-    const ctx1=$('#chart1').getContext('2d');
-    ch1 && ch1.destroy();
-    ch1 = new Chart(ctx1,{type:'doughnut',data:{
-      labels:Object.keys(byCat),
-      datasets:[{data:Object.values(byCat)}]
-    }});
-
-    const paid=state.commitments.filter(c=>c.paid).length;
-    const tot=state.commitments.length||1;
-    const ctx2=$('#chart2').getContext('2d');
-    ch2 && ch2.destroy();
-    ch2 = new Chart(ctx2,{type:'bar',data:{
-      labels:['Paid','Pending'],
-      datasets:[{data:[paid,tot-paid]}]
-    }});
-  }
-
-  // ===== تنبيهات محلية (عبر ServiceWorker حين يكون الموقع مفتوح/مثبّت) =====
-  function scheduleLocalReminders(){
-    if(!navigator.serviceWorker?.controller) return;
-    const today = new Date();
-    // التزامات
-    state.commitments.forEach(c=>{
-      if(c.paid||!c.due) return;
-      const d = new Date(c.due);
-      const delta = Math.ceil((d - today)/(1000*60*60*24));
-      if(delta<=3 && delta>=0){
-        navigator.serviceWorker.controller.postMessage({
-          type:'notify', title:'Commitment due soon',
-          body:`${c.name} in ${delta} day(s)`
-        });
-      }
-      if(delta<0){
-        navigator.serviceWorker.controller.postMessage({
-          type:'notify', title:'Overdue payment',
-          body:`${c.name} is overdue`
-        });
-      }
-    });
-    // أحداث
-    state.events.forEach(ev=>{
-      const d = new Date(ev.date);
-      const delta = Math.ceil((d - today)/(1000*60*60*24));
-      if([30,7,3].includes(delta)){
-        navigator.serviceWorker.controller.postMessage({
-          type:'notify', title:'Event reminder',
-          body:`${ev.name} in ${delta} day(s)`
-        });
-      }
-    });
-  }
-
-  // ===== تسجيل الدخول بقوقل =====
-  $('#googleBtn').onclick = async ()=>{
-    try{
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const res = await auth.signInWithPopup(provider);
-      state.user = res.user; saveLocal();
-      $('#googleBtn').textContent = 'Signed in ✓';
-      await syncFromCloud(); renderAll();
-    }catch(err){
-      alert('Google sign-in failed. Make sure your domain is authorized in Firebase.');
-      console.error(err);
-    }
-  };
-
-  // ===== تهيئة أولية =====
-  function renderAll(){
-    bindBasics(); applyTheme();
-    renderCommitments(); renderExpenses(); renderSavings(); renderEvents();
-    $('#notesArea').value = state.notes||'';
-    updateStats();
-  }
+/* ===== Local prefs (قبل تسجيل الدخول) ===== */
+nameEl.value = localStorage.getItem('sb_name') || '';
+currencyEl.value = localStorage.getItem('sb_cur') || '€ EUR';
+accentEl.value = localStorage.getItem('sb_accent') || 'Blue';
+[nameEl,currencyEl,accentEl].forEach(el=> el.onchange = ()=> {
+  localStorage.setItem('sb_name', nameEl.value);
+  localStorage.setItem('sb_cur', currencyEl.value);
+  localStorage.setItem('sb_accent', accentEl.value);
   renderAll();
-  // أعِد جدولة التذكيرات كلما تغيّر شيء
-  ['commitments','events'].forEach(k=>{
-    const orig = state.__defineSetter__ ? null : null; // placeholder
-  });
-  setInterval(scheduleLocalReminders, 60*1000); // فحص كل دقيقة خفيفة
+  if(uid) savePrefs();
+});
 
-  </script>
+/* ===== SW register + notifications ===== */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js'); }
+btnNotify.onclick = async ()=>{
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm!=='granted') alert('Notifications are blocked.');
+  }catch(e){ console.error(e); }
+};
+
+/* ===== Auth ===== */
+btnGoogle.onclick = async ()=>{
+  try{ await signInWithPopup(auth, provider); }
+  catch(e){ alert('Google sign-in blocked (pop-ups?).'); console.error(e); }
+};
+btnLogout.onclick = ()=> signOut(auth);
+
+/* ===== Firestore state ===== */
+let uid=null, userDocRef=null, userData=null;
+async function savePrefs(){ await updateDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } }); }
+
+/* ===== Helpers ===== */
+function daysUntil(dateISO){ return Math.ceil((new Date(dateISO).getTime()-Date.now())/86400000); }
+function statusFromDue(dueISO, status){
+  if(status==='Paid') return 'Paid';
+  if(!dueISO) return 'Pending';
+  const d=daysUntil(dueISO);
+  if(d<0) return 'Overdue';
+  if(d<=3) return 'Due soon';
+  return 'Pending';
+}
+function pillClass(s){ return s==='Paid'?'paid': s==='Overdue'?'over': s==='Due soon'?'soon':'pend'; }
+function scheduleLocalReminder(payload){
+  if(!navigator.serviceWorker.controller) return;
+  navigator.serviceWorker.controller.postMessage({type:'schedule', payload});
+}
+
+/* ===== Renderers (Dashboard KPIs) ===== */
+function renderKPIs(){
+  const name = nameEl.value || 'Guest';
+  setText('welcome', `Welcome, ${name} 👋`);
+
+  const exps = userData?.expenses || [];
+  const cmt  = userData?.commitments || [];
+  const bud  = userData?.budget || [];
+
+  // balance = income - (expenses + fixed)
+  const income = bud.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount||0),0);
+  const fixed  = bud.filter(x=>x.type!=='income').reduce((a,x)=>a+Number(x.amount||0),0);
+  const expTot = exps.reduce((a,x)=>a+Number(x.amount||0),0);
+  setText('kpi-balance', fmt(income - (expTot + fixed)));
+  setText('kpi-exp', fmt(expTot));
+
+  const paid = cmt.filter(x=>x.status==='Paid').length;
+  setText('kpi-paid-count', `${paid}/${cmt.length}`);
+  byId('kpi-paid').style.width = (cmt.length? Math.round(paid*100/cmt.length):0)+'%';
+
+  // next due
+  const upcoming = cmt.filter(x=>x.status!=='Paid' && x.due).map(x=>({name:x.name,days:daysUntil(x.due)})).sort((a,b)=>a.days-b.days)[0];
+  setText('kpi-next-due', upcoming? `${upcoming.days} day(s) — ${upcoming.name}` : '—');
+
+  // events
+  const evs = userData?.events || [];
+  const now = new Date();
+  const nextEv = evs.map(x=>({name:x.eventName,date:new Date(x.eventDate)})).filter(x=>x.date>=now).map(x=>({name:x.name,days:Math.ceil((x.date-now)/86400000)})).sort((a,b)=>a.days-b.days)[0];
+  setText('kpi-next-event', nextEv? `${nextEv.days} day(s) — ${nextEv.name}` : '—');
+
+  // snapshot
+  const perCat = {};
+  exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
+  const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>k).join(', ') || '—';
+  setText('dash-top3', top);
+  setText('dash-daily', fmt(expTot/30));
+  byId('dash-recent').innerHTML = exps.slice(-6).reverse().map(e=>`<li>${e.date} — ${e.category}: ${fmt(e.amount)} (${e.method})</li>`).join('');
+}
+
+/* ===== Tables (Budget / Expenses / Commitments / Savings / Payments / Events / Notes) ===== */
+function redrawBudget(){
+  const tbody = byId('b_table').querySelector('tbody'); const items = userData?.budget||[];
+  tbody.innerHTML = items.map(x=>`<tr><td>${x.item}</td><td>${x.type}</td><td>${fmt(x.amount)}</td><td><button class="ghost" data-bid="${x.id}">Delete</button></td></tr>`).join('');
+  tbody.querySelectorAll('button[data-bid]').forEach(b=> b.onclick = ()=> delRow('budget', b.dataset.bid));
+  const inc=items.filter(i=>i.type==='income').reduce((a,x)=>a+Number(x.amount||0),0);
+  const fix=items.filter(i=>i.type==='fixed').reduce((a,x)=>a+Number(x.amount||0),0);
+  const varb=items.filter(i=>i.type==='variable').reduce((a,x)=>a+Number(x.amount||0),0);
+  setText('b_totals', `Income ${fmt(inc)} • Fixed ${fmt(fix)} • Variable ${fmt(varb)}`);
+}
+function redrawExpenses(){
+  const tbody = byId('e_table').querySelector('tbody'); const exps = userData?.expenses||[];
+  tbody.innerHTML = exps.slice().reverse().map(e=>`<tr>
+    <td>${e.date}</td><td>${e.category}</td><td>${e.description||''}</td>
+    <td>${fmt(e.amount)}</td><td>${e.method}</td>
+    <td><button class="ghost" data-id="${e.id}" data-type="expense">Delete</button></td>
+  </tr>`).join('');
+  tbody.querySelectorAll('button[data-type="expense"]').forEach(b=> b.onclick=()=>delRow('expenses', b.dataset.id));
+  setText('e_total', exps.reduce((a,x)=>a+Number(x.amount||0),0).toFixed(2));
+}
+function redrawCommitments(){
+  const tbody = byId('c_table').querySelector('tbody'); const cs = userData?.commitments||[];
+  tbody.innerHTML = cs.map(c=>{
+    const s = statusFromDue(c.due,c.status);
+    return `<tr>
+      <td>${c.name}</td><td>${c.category}</td><td>${fmt(c.amount)}</td><td>${c.due||''}</td>
+      <td><span class="pill ${pillClass(s)}">${s}</span></td>
+      <td>${c.remind?`🔔 ${c.remindDays}d before`:''}</td>
+      <td>
+        <button class="ghost" data-act="paid" data-id="${c.id}">Mark paid</button>
+        <button class="ghost" data-act="del" data-id="${c.id}">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('button').forEach(b=> b.onclick=()=> rowActionCommit(b.dataset.act,b.dataset.id));
+  setText('c_total', (userData?.commitments||[]).reduce((a,x)=>a+Number(x.amount||0),0).toFixed(2));
+}
+function redrawSavings(){
+  const tbody = byId('s_table').querySelector('tbody'); const ss = userData?.savings||[];
+  tbody.innerHTML = ss.map(s=>{
+    const prog = Math.min(Math.round((s.saved||0)*100/Number(s.target||1)),100);
+    return `<tr>
+      <td>${s.name}</td><td>${s.category}</td><td>${fmt(s.target)}</td>
+      <td>${s.months}</td><td>${fmt(s.monthly)}</td><td>${s.start}</td><td>${s.end}</td>
+      <td><div class="progress"><i style="width:${prog}%"></i></div><div class="small muted">${prog}%</div></td>
+      <td><button class="ghost" data-id="${s.id}">Delete</button></td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('button').forEach(b=> b.onclick = ()=> delRow('savings', b.dataset.id));
+  const totalProg = ss.length? Math.round((ss.reduce((a,x)=>a+(x.saved||0),0)/ss.reduce((a,x)=>a+Number(x.target||0),0))*100):0;
+  setText('s_total_prog', (isFinite(totalProg)?totalProg:0)+'%');
+}
+function redrawPayments(){
+  const tbody = byId('p_table').querySelector('tbody'); const ps = userData?.payments||[];
+  tbody.innerHTML = ps.slice().reverse().map(p=>`<tr>
+    <td>${p.date}</td><td>${p.type}</td><td>${p.ref}</td><td>${fmt(p.amount)}</td>
+    <td><button class="ghost" data-id="${p.id}">Delete</button></td>
+  </tr>`).join('');
+  tbody.querySelectorAll('button').forEach(b=> b.onclick=()=> delRow('payments', b.dataset.id));
+}
+function redrawEvents(){
+  const tbody = byId('ev_table').querySelector('tbody'); const evs = userData?.events||[];
+  let giftsTotal=0, nextDays=null;
+  tbody.innerHTML = evs.map(e=>{
+    giftsTotal += Number(e.planned||0);
+    const diff = Math.ceil((new Date(e.eventDate)-Date.now())/86400000);
+    if(diff>=0 && (nextDays===null || diff<nextDays)) nextDays=diff;
+    let cls='pend', txt='—'; 
+    if(diff<0){ cls=''; txt='⚪ Past'; }
+    else if(diff<=3){ cls='over'; txt='🔴 3 days'; }
+    else if(diff<=7){ cls='soon'; txt='🟠 1 week'; }
+    else if(diff<=30){ cls='pend'; txt='💙 1 month'; }
+    else { cls='pend'; txt=diff+' days'; }
+    return `<tr>
+      <td>${e.eventName}</td><td>${e.eventType}</td><td>${e.eventDate}</td><td>${fmt(e.planned||0)}</td>
+      <td><span class="pill ${cls}">${txt}</span></td><td>${e.notes||''}</td>
+      <td><button class="ghost" data-id="${e.id}">Delete</button></td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('button').forEach(b=> b.onclick=()=> delRow('events', b.dataset.id));
+  setText('ev_gifts', (giftsTotal||0).toFixed(2));
+  setText('ev_next', nextDays===null?'—':`${nextDays} day(s)`);
+}
+
+/* ===== Analysis ===== */
+function renderAnalysis(){
+  const exps = userData?.expenses||[];
+  setText('a_month_total', fmt(exps.reduce((a,x)=>a+Number(x.amount||0),0)));
+  setText('a_tx', exps.length);
+  const perCat={}; exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
+  const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+  setText('a_top', top);
+}
+
+/* ===== Glue render ===== */
+function renderAll(){ renderKPIs(); redrawBudget(); redrawExpenses(); redrawCommitments(); redrawSavings(); redrawPayments(); redrawEvents(); renderAnalysis(); }
+
+/* ===== Add handlers ===== */
+byId('btnAddB').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const item = { id:crypto.randomUUID(), item:byId('b_item').value, type:byId('b_type').value, amount:Number(byId('b_amt').value||0) };
+  if(!item.item || !item.amount) return alert('Enter item & amount');
+  await updateArray('budget', item);
+  byId('b_item').value=''; byId('b_amt').value='';
+};
+byId('btnAddE').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const it = { id:crypto.randomUUID(), date:byId('e_date').value||todayISO(), category:byId('e_cat').value, description:byId('e_desc').value||'', amount:Number(byId('e_amt').value||0), method:byId('e_method').value };
+  if(!it.amount) return alert('Amount?');
+  await updateArray('expenses', it); byId('e_desc').value=''; byId('e_amt').value='';
+};
+byId('btnAddC').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const it = { id:crypto.randomUUID(), name:byId('c_name').value, category:byId('c_cat').value, amount:Number(byId('c_amount').value||0), due:byId('c_due').value, status:"Pending", remind:byId('c_remind').checked, remindDays:Number(byId('c_remindWhen').value) };
+  if(!it.name || !it.amount || !it.due) return alert('Enter name, amount, due');
+  await updateArray('commitments', it);
+  if(it.remind){
+    const when = new Date(it.due); when.setDate(when.getDate()-it.remindDays);
+    scheduleLocalReminder({ id:it.id, title:'Commitment Reminder', body:`${it.name} due ${it.due} (${fmt(it.amount)})`, fireAt:when.getTime() });
+  }
+  byId('c_name').value=''; byId('c_amount').value=''; byId('c_due').value='';
+};
+byId('btnAddS').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const name=byId('s_name').value, cat=byId('s_cat').value, target=Number(byId('s_target').value||0), months=Number(byId('s_months').value||0);
+  if(!name||!target||!months) return alert('Fill goal, target, months');
+  const start=byId('s_start').value||todayISO(); const end = (d=>{d.setMonth(d.getMonth()+months);return d.toISOString().slice(0,10)})(new Date(start));
+  byId('s_end').value=end;
+  const monthly = target/months;
+  const it = { id:crypto.randomUUID(), name, category:cat, target, months, monthly, start, end, saved:0 };
+  await updateArray('savings', it);
+  if(byId('s_toCommit').checked){
+    await updateArray('commitments', { id:crypto.randomUUID(), name:`Saving – ${name}`, category:'Savings / Investments', amount:monthly, due:start, status:'Pending', remind:true, remindDays:7 });
+  }
+  byId('s_name').value=''; byId('s_target').value=''; byId('s_months').value='';
+};
+byId('btnAddP').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const it = { id:crypto.randomUUID(), type:byId('p_type').value, ref:byId('p_ref').value, amount:Number(byId('p_amt').value||0), date:byId('p_date').value||todayISO() };
+  if(!it.amount || !it.ref) return alert('Ref & amount required');
+  await updateArray('payments', it); byId('p_ref').value=''; byId('p_amt').value='';
+};
+byId('btnAddEV').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const name=byId('ev_name').value, type=byId('ev_type').value, date=byId('ev_date').value, planned=Number(byId('ev_amt').value||0), notes=byId('ev_notes').value||'';
+  if(!name||!date) return alert('Event name & date required');
+  const it = { id:crypto.randomUUID(), eventName:name, eventType:type, eventDate:date, planned, notes };
+  await updateArray('events', it);
+  if(byId('ev_toCommit').checked && planned>0){
+    await updateArray('commitments', { id:crypto.randomUUID(), name:`Gift – ${name}`, category:'Gifts & Celebrations', amount:planned, due:date, status:'Pending', remind:true, remindDays:7 });
+  }
+  byId('ev_name').value=''; byId('ev_amt').value=''; byId('ev_notes').value='';
+};
+byId('btnSaveNotes').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  await updateDoc(userDocRef, { notes: byId('notes').value||'' });
+  alert('Notes saved.');
+};
+
+/* ===== Row helpers ===== */
+async function rowActionCommit(act,id){
+  if(act==='paid'){
+    const list = (userData.commitments||[]).map(x=> x.id===id? {...x, status:'Paid'}:x );
+    await updateDoc(userDocRef,{ commitments:list });
+  } else if(act==='del'){ await delRow('commitments', id); }
+}
+async function delRow(collectionKey, id){
+  const list = (userData[collectionKey]||[]).filter(x=>x.id!==id);
+  await updateDoc(userDocRef, { [collectionKey]: list });
+}
+async function updateArray(key, item){
+  const docSnap = await getDoc(userDocRef);
+  if(!docSnap.exists()) await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } });
+  await updateDoc(userDocRef, { [key]: arrayUnion(item) });
+}
+
+/* ===== Auto calc saving end ===== */
+byId('s_start').addEventListener('change', ()=>{
+  const months = Number(byId('s_months').value||0); if(!months) return;
+  const s = new Date(byId('s_start').value); s.setMonth(s.getMonth()+months); byId('s_end').value = s.toISOString().slice(0,10);
+});
+
+/* ===== Auth listener ===== */
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    uid = user.uid;
+    btnGoogle.style.display='none'; btnLogout.style.display='';
+    userDocRef = doc(db,'users',uid);
+    const snap = await getDoc(userDocRef);
+    if(!snap.exists()){
+      await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value }, budget:[], expenses:[], commitments:[], savings:[], payments:[], events:[], notes:'' });
+    }
+    onSnapshot(userDocRef,(s)=>{
+      userData = s.data() || {};
+      const p = userData.prefs||{};
+      nameEl.value = p.name || nameEl.value; currencyEl.value = p.currency || currencyEl.value; accentEl.value = p.accent || accentEl.value;
+      byId('notes').value = userData.notes || '';
+      renderAll();
+    });
+  }else{
+    uid=null; userData=null;
+    btnGoogle.style.display=''; btnLogout.style.display='none';
+    renderAll();
+  }
+});
+
+/* ===== Initial show ===== */
+document.querySelectorAll('section[id^="tab-"]').forEach((s,i)=> s.style.display = i? 'none':'grid');
+renderAll();
+</script>
 </body>
   </html>
