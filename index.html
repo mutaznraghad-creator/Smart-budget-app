@@ -5,20 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Smart Budget & Commitments Dashboard</title>
 
-<!-- PWA manifest + theme -->
-<link rel="manifest" href="manifest.webmanifest">
+<!-- PWA manifest + icons -->
+<link rel="manifest" href="/Manifest.webmanifest">
 <meta name="theme-color" content="#0f1f39"/>
 
-<!-- Favicon / icons (الجذر وليس /icons) -->
-<link rel="icon" type="image/png" sizes="16x16" href="icon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
-<link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<link rel="icon" type="image/png" sizes="128x128" href="icon-128.png">
-<link rel="icon" type="image/png" sizes="180x180" href="icon-180.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="256x256" href="icon-256.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<!-- Favicon (classic) -->
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/icons/icon-64.png">
+<link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128.png">
+
+<!-- PWA icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="256x256" href="/icons/icon-256.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+
+<!-- iOS/Apple -->
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Smart Budget">
@@ -26,11 +29,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"/>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
 <style>
 :root{
+  --bg:#f5f6fa; --card:#fff; --ink:#111827;
+  --brand:#3157E0; --muted:#6b7280; --soft:#e8ecf8;
+  --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --ring:#d1d5db;
+}
+[data-theme="dark"]{
   --bg:#0b1220; --card:#111827; --ink:#e5ecff;
   --brand:#6c8bff; --muted:#98a2b3; --soft:#1a2440; --ring:#2a3347;
-  /* عند الرغبة بالوضع الفاتح بدّلي المتغيرات */
 }
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
 .wrap{max-width:1160px;margin:0 auto;padding:16px}
@@ -45,26 +55,30 @@ textarea{height:auto;min-height:110px;resize:vertical}
 button{height:42px;padding:10px 14px;border-radius:14px;border:0;background:var(--brand);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(49,87,224,.25)}
 button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--ring);box-shadow:none}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
-nav button{background:#e8efff1a;color:#e5ecff;border:1px solid #2a3347}
-nav button.active{background:var(--brand);color:#fff;border-color:transparent}
+nav button{background:#e8efff;color:#0f2a7a;border:0}
+nav button.active{background:var(--brand);color:#fff}
 .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:16px}
 .h2{font-size:20px;font-weight:800;margin:4px 0 12px}
 .grid{display:grid;gap:12px}
 .grid-2{grid-template-columns:1fr 1fr}
 .grid-3{grid-template-columns:repeat(3,1fr)}
-@media(max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:980px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
 .kpi{display:grid;gap:8px}
 .kpi .big{font-size:30px;font-weight:800}
-blockquote{margin:0;padding:12px;border-radius:12px;background:#1a2440;border:1px dashed #2f3b59;color:#cfe0ff}
+blockquote{margin:0;padding:12px;border-radius:12px;background:#eef4ff;border:1px dashed #cfd9ff;color:#0f2a7a}
 .muted{color:var(--muted)} .right{margin-left:auto}
 table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid var(--ring);vertical-align:top}
 .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;font-size:12px}
-.paid{background:#14532d;color:#bbf7d0} .soon{background:#7c2d12;color:#ffedd5} .over{background:#7f1d1d;color:#fee2e2} .pend{background:#1e3a8a;color:#e5edff}
-.progress{height:12px;background:#1a2440;border-radius:999px;overflow:hidden} .progress>i{display:block;height:100%;background:var(--brand);width:0}
+.paid{background:#dcfce7;color:#166534} .soon{background:#fff7ed;color:#9a3412} .over{background:#fee2e2;color:#991b1b} .pend{background:#e5edff;color:#1e3a8a}
+.progress{height:12px;background:#edf1fb;border-radius:999px;overflow:hidden} .progress>i{display:block;height:100%;background:var(--brand);width:0}
 .small{font-size:12px}
 .badge{padding:4px 8px;border-radius:8px;border:1px solid var(--ring);background:var(--card)}
 .sep{height:1px;background:var(--ring);margin:8px 0}
 ul.clean{margin:0;padding-left:18px}
+canvas{width:100%;height:220px}
+canvas.mini{height:160px}
+.insight{background:var(--card);border:1px dashed var(--ring);padding:10px;border-radius:12px}
 </style>
 </head>
 <body>
@@ -72,7 +86,7 @@ ul.clean{margin:0;padding-left:18px}
 
   <!-- Header -->
   <header class="row">
-    <img src="icon-192.png" class="logo" alt="logo" onerror="this.src='icon-64.png'">
+    <img src="/icons/icon-192.png" class="logo" alt="logo">
     <div class="title">Smart Budget & Commitments</div>
     <span class="right"></span>
     <button class="ghost" id="btn-theme">🌙/☀️</button>
@@ -105,22 +119,37 @@ ul.clean{margin:0;padding-left:18px}
 
   <!-- ===== DASHBOARD ===== -->
   <section id="tab-dash" class="grid grid-2">
+    <!-- Quick Overview + Insights -->
     <div class="card">
       <div class="h2" id="welcome">Welcome, Guest 👋</div>
       <blockquote>“Track your money. Master your life.”</blockquote>
+
+      <!-- Quick Overview -->
       <div class="grid grid-3" style="margin-top:10px">
-        <div class="card kpi"><div class="muted small">Total Balance</div><div class="big" id="kpi-balance">€ 0.00</div></div>
+        <div class="card kpi"><div class="muted small">Current Balance</div><div class="big" id="kpi-balance">€ 0.00</div></div>
         <div class="card kpi"><div class="muted small">Total Expenses (month)</div><div class="big" id="kpi-exp">€ 0.00</div></div>
         <div class="card kpi">
           <div class="row"><div class="muted small">% Commitments Paid</div><div class="right small" id="kpi-paid-count">0/0</div></div>
           <div class="progress"><i id="kpi-paid"></i></div>
         </div>
       </div>
+
+      <!-- Smart Insights -->
+      <div class="grid" style="margin-top:10px">
+        <div class="insight" id="insights">
+          <div class="small muted">Smart Insights</div>
+          <ul class="small" id="insights-list" style="margin:6px 0 0 18px"></ul>
+        </div>
+      </div>
+
+      <!-- Upcoming -->
       <div class="card" style="margin-top:10px">
-        <div class="row"><div><b>Next Event</b></div><div class="right muted small" id="kpi-next-event">—</div></div>
         <div class="row"><div><b>Next Due</b></div><div class="right muted small" id="kpi-next-due">—</div></div>
+        <div class="row"><div><b>Next Event</b></div><div class="right muted small" id="kpi-next-event">—</div></div>
       </div>
     </div>
+
+    <!-- Mini Charts -->
     <div class="card">
       <div class="h2">This Month Snapshot</div>
       <div class="row">
@@ -130,6 +159,17 @@ ul.clean{margin:0;padding-left:18px}
       <div class="sep"></div>
       <div class="small muted">Recent expenses</div>
       <ul id="dash-recent" class="clean small muted"></ul>
+      <div class="sep"></div>
+      <div class="grid grid-2">
+        <div>
+          <div class="small muted">Commitments status</div>
+          <canvas id="miniCommit" class="mini"></canvas>
+        </div>
+        <div>
+          <div class="small muted">Savings progress</div>
+          <canvas id="miniSavings" class="mini"></canvas>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -192,7 +232,7 @@ ul.clean{margin:0;padding-left:18px}
     </div>
   </section>
 
-  <!-- ===== PAYMENTS ===== -->
+  <!-- ===== PAYMENTS (logs) ===== -->
   <section id="tab-payments" class="grid">
     <div class="card">
       <div class="h2">Payments</div>
@@ -201,8 +241,10 @@ ul.clean{margin:0;padding-left:18px}
         <input id="p_ref" placeholder="Reference (e.g. Rent June)">
         <input id="p_amt" type="number" step="0.01" placeholder="Amount">
         <input id="p_date" type="date">
+        <datalist id="goals"></datalist>
         <button id="btnAddP">+ Log Payment</button>
       </div>
+      <div class="small muted">Tip: for Saving payments, set <i>Reference</i> exactly to the goal name to auto-increase its saved amount.</div>
     </div>
     <div class="card">
       <div class="row"><div class="h2" style="margin:0">History</div></div>
@@ -216,11 +258,7 @@ ul.clean{margin:0;padding-left:18px}
       <div class="h2">Commitments (Fixed)</div>
       <div class="row">
         <input id="c_name" placeholder="Commitment name" style="flex:2">
-        <select id="c_cat" style="width:260px">
-          <option>Rent / Mortgage</option><option>Electricity</option><option>Water</option>
-          <option>Internet & Phone</option><option>Insurance</option><option>Gym / Fitness</option>
-          <option>Savings / Investments</option><option>Other Fixed</option>
-        </select>
+        <select id="c_cat" style="width:260px"></select>
         <input id="c_amount" type="number" step="0.01" placeholder="Monthly">
         <input id="c_due" type="date">
         <button id="btnAddC">+ Add</button>
@@ -239,42 +277,27 @@ ul.clean{margin:0;padding-left:18px}
   <!-- ===== ANALYSIS ===== -->
   <section id="tab-analysis" class="grid">
     <div class="card">
-      <div class="h2">Spending Analysis</div>
-      <div class="row">
-        <span class="badge">Expenses this month: <b id="a_month_total">—</b></span>
-        <span class="badge">Top category: <b id="a_top">—</b></span>
-        <span class="badge">Transactions: <b id="a_tx">0</b></span>
+      <div class="h2">Spending Analysis (Charts)</div>
+      <div class="grid grid-2">
+        <div><div class="small muted">By Category (Pie)</div><canvas id="chPie"></canvas></div>
+        <div><div class="small muted">Monthly Trend (Bar - last 6)</div><canvas id="chBar"></canvas></div>
       </div>
-      <div class="sep"></div>
-      <div class="small muted">Helper formulas (Google Sheets):</div>
-      <ul class="small muted clean">
-        <li>Days to Event: <code>= [Event_Date]-TODAY()</code></li>
-        <li>Months to Save: <code>=DATEDIF([Start_Date],[End_Date],"M")+1</code></li>
-        <li>Monthly Contr.: <code>=ROUNDUP([Target]/[Months],2)</code></li>
-        <li>Status: <code>=IF(Paid>=Amount,"Paid",IF(Due<TODAY(),"Overdue",IF(Due-TODAY()<=3,"Due Soon","Pending")))</code></li>
-      </ul>
+      <div class="grid grid-2" style="margin-top:12px">
+        <div><div class="small muted">Income vs Expenses (Line)</div><canvas id="chLine"></canvas></div>
+        <div><div class="small muted">Commitments Status (Doughnut)</div><canvas id="chDoughnut"></canvas></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="small muted">Spending Behavior (Radar)</div>
+        <canvas id="chRadar"></canvas>
+      </div>
     </div>
-  </section>
 
-  <!-- ===== EVENTS ===== -->
-  <section id="tab-events" class="grid">
     <div class="card">
-      <div class="h2">Events & Gifts</div>
-      <div class="row">
-        <input id="ev_name" placeholder="Event (e.g. Mom's Birthday)" style="flex:2">
-        <select id="ev_type"><option>Birthday</option><option>Anniversary</option><option>Holiday</option><option>Gift</option><option>Other</option></select>
-        <input id="ev_date" type="date">
-        <input id="ev_amt" type="number" step="0.01" placeholder="Planned spend">
-      </div>
+      <div class="h2" style="margin:0">Text Insights</div>
+      <ul class="small" id="txtInsights"></ul>
       <div class="row" style="margin-top:8px">
-        <label class="chip"><input type="checkbox" id="ev_toCommit" style="margin-right:8px">Add to Commitments</label>
-        <textarea id="ev_notes" placeholder="Notes…" style="flex:1"></textarea>
-        <button id="btnAddEV">+ Add Event</button>
+        <button id="btnCompare" class="ghost">Compare to last month</button>
       </div>
-    </div>
-    <div class="card">
-      <div class="row"><div class="h2" style="margin:0">Planner</div><div class="right muted">Next in: <span id="ev_next">—</span> | Gifts budget: <span id="ev_gifts">0.00</span></div></div>
-      <table id="ev_table"><thead><tr><th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminder</th><th>Notes</th><th></th></tr></thead><tbody></tbody></table>
     </div>
   </section>
 
@@ -296,7 +319,7 @@ ul.clean{margin:0;padding-left:18px}
 <!-- Firebase (modular v10) + App logic -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ===== Firebase config ===== */
@@ -306,7 +329,7 @@ const firebaseConfig = {
   projectId: "smart-budget-61664",
   storageBucket: "smart-budget-61664.appspot.com",
   messagingSenderId: "273780649075",
-  appId: "1:273780649075:web:c0c08d6d56f5085e9e0e06"
+  appId: "1:273780649075:web:c0c08d6d56f5085e9e06"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -329,10 +352,11 @@ const byId = id => document.getElementById(id);
 const setText = (id,t)=>{ const el=byId(id); if(el) el.textContent = t; };
 const fmt = (v)=> (byId('currency').value.split(' ')[0] || '€') + ' ' + Number(v||0).toFixed(2);
 const todayISO = ()=> new Date().toISOString().slice(0,10);
+const monthKey = d => (d.slice ? d.slice(0,7) : new Date(d).toISOString().slice(0,7)); // YYYY-MM
 
 /* ===== Theme toggle ===== */
 const btnTheme = byId('btn-theme');
-const savedTheme = localStorage.getItem('sb_theme') || 'dark';
+const savedTheme = localStorage.getItem('sb_theme') || 'light';
 if(savedTheme==='dark') document.documentElement.setAttribute('data-theme','dark');
 btnTheme.onclick = ()=>{
   const dark = document.documentElement.getAttribute('data-theme')==='dark';
@@ -347,11 +371,13 @@ document.querySelectorAll('nav button').forEach(b=>{
     b.classList.add('active');
     document.querySelectorAll('section[id^="tab-"]').forEach(sec=>sec.style.display='none');
     byId('tab-'+b.dataset.tab).style.display = 'grid';
+    // إعادة رسم الرسوم عند فتح تبويب التحليل
+    if(b.dataset.tab==='analysis'){ buildCharts(); fillTextInsights(); }
   };
 });
 
-/* ===== Categories ===== */
-const EXPENSE_CATEGORIES = [
+/* ===== Full categories ===== */
+const FULL_CATEGORIES = [
   "Groceries","Coffee & Snacks","Dining Out","Household Supplies","Fuel / Gas","Public Transport","Car Maintenance",
   "Rent / Mortgage","Electricity","Water","Internet & Phone","Home Maintenance","Healthcare / Medicine","Insurance",
   "Gym / Fitness","Personal Care","Clothing & Accessories","Gifts & Celebrations","Entertainment","Hobbies & Subscriptions",
@@ -359,7 +385,8 @@ const EXPENSE_CATEGORIES = [
   "Travel","Accommodation","Activities & Tickets","Donations & Charity","Taxes & Fees","Miscellaneous"
 ];
 function fillSelect(sel, items){ sel.innerHTML = items.map(x=>`<option>${x}</option>`).join(''); }
-fillSelect(byId('e_cat'), EXPENSE_CATEGORIES);
+fillSelect(byId('e_cat'), FULL_CATEGORIES);
+fillSelect(byId('c_cat'), FULL_CATEGORIES);
 
 /* ===== Inputs & buttons ===== */
 const nameEl=byId('userName'), currencyEl=byId('currency'), accentEl=byId('accent');
@@ -386,30 +413,16 @@ btnNotify.onclick = async ()=>{
   }catch(e){ console.error(e); }
 };
 
-/* ===== Auth (Popup + Redirect fallback) ===== */
+/* ===== Auth ===== */
 btnGoogle.onclick = async ()=>{
-  try{
-    await signInWithPopup(auth, provider);
-  }catch(e){
-    try{ await signInWithRedirect(auth, provider); }
-    catch(err){ alert('Google sign-in blocked.'); console.error(err); }
-  }
+  try{ await signInWithPopup(auth, provider); }
+  catch(e){ alert('Google sign-in blocked (pop-ups?).'); console.error(e); }
 };
-getRedirectResult(auth).catch(()=>{});
 btnLogout.onclick = ()=> signOut(auth);
 
 /* ===== Firestore state ===== */
 let uid=null, userDocRef=null, userData=null;
-
-async function ensureUserRef(){
-  if(!uid) throw new Error('Sign in first.');
-  if(!userDocRef) userDocRef = doc(db,'users',uid);
-  const s = await getDoc(userDocRef);
-  if(!s.exists()){
-    await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value }, budget:[], expenses:[], commitments:[], savings:[], payments:[], events:[], notes:'' });
-  }
-}
-async function savePrefs(){ await ensureUserRef(); await updateDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } }); }
+async function savePrefs(){ await updateDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } }); }
 
 /* ===== Helpers ===== */
 function daysUntil(dateISO){ return Math.ceil((new Date(dateISO).getTime()-Date.now())/86400000); }
@@ -423,11 +436,16 @@ function statusFromDue(dueISO, status){
 }
 function pillClass(s){ return s==='Paid'?'paid': s==='Overdue'?'over': s==='Due soon'?'soon':'pend'; }
 function scheduleLocalReminder(payload){
-  if(!navigator.serviceWorker.controller) return;
-  navigator.serviceWorker.controller.postMessage({type:'schedule', payload});
+  // جدولة داخل الصفحة (أفضل اعتمادية من SW)
+  const delay = Math.max(0, payload.fireAt - Date.now());
+  setTimeout(()=>{ if(Notification.permission==='granted'){ new Notification(payload.title, { body: payload.body, icon:'/icons/icon-192.png' }); } }, delay);
+  // وبالإضافة إرسال للـ SW (قد لا يبقى حيًا لكنه يحاول)
+  if(navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'schedule', payload});
+  }
 }
 
-/* ===== Renderers (KPIs) ===== */
+/* ===== Renderers (KPIs + Insights) ===== */
 function renderKPIs(){
   const name = nameEl.value || 'Guest';
   setText('welcome', `Welcome, ${name} 👋`);
@@ -435,10 +453,13 @@ function renderKPIs(){
   const exps = userData?.expenses || [];
   const cmt  = userData?.commitments || [];
   const bud  = userData?.budget || [];
+  const savs = userData?.savings || [];
 
+  // balance = income - (expenses + fixed)
   const income = bud.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount||0),0);
   const fixed  = bud.filter(x=>x.type!=='income').reduce((a,x)=>a+Number(x.amount||0),0);
-  const expTot = exps.reduce((a,x)=>a+Number(x.amount||0),0);
+  const expTot = exps.filter(e=> monthKey(e.date)===monthKey(todayISO()))
+                     .reduce((a,x)=>a+Number(x.amount||0),0);
   setText('kpi-balance', fmt(income - (expTot + fixed)));
   setText('kpi-exp', fmt(expTot));
 
@@ -446,20 +467,83 @@ function renderKPIs(){
   setText('kpi-paid-count', `${paid}/${cmt.length}`);
   byId('kpi-paid').style.width = (cmt.length? Math.round(paid*100/cmt.length):0)+'%';
 
+  // next due
   const upcoming = cmt.filter(x=>x.status!=='Paid' && x.due).map(x=>({name:x.name,days:daysUntil(x.due)})).sort((a,b)=>a.days-b.days)[0];
   setText('kpi-next-due', upcoming? `${upcoming.days} day(s) — ${upcoming.name}` : '—');
 
+  // events
   const evs = userData?.events || [];
   const now = new Date();
   const nextEv = evs.map(x=>({name:x.eventName,date:new Date(x.eventDate)})).filter(x=>x.date>=now).map(x=>({name:x.name,days:Math.ceil((x.date-now)/86400000)})).sort((a,b)=>a.days-b.days)[0];
   setText('kpi-next-event', nextEv? `${nextEv.days} day(s) — ${nextEv.name}` : '—');
 
+  // snapshot
   const perCat = {};
-  exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
+  exps.forEach(e=> { const mOk = monthKey(e.date)===monthKey(todayISO()); if(mOk) perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0); });
   const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>k).join(', ') || '—';
   setText('dash-top3', top);
-  setText('dash-daily', fmt(expTot/30));
-  byId('dash-recent').innerHTML = exps.slice(-6).reverse().map(e=>`<li>${e.date} — ${e.category}: ${fmt(e.amount)} (${e.method})</li>`).join('');
+  const monthDays = new Date().getDate();
+  setText('dash-daily', fmt((expTot||0)/monthDays));
+  byId('dash-recent').innerHTML = (userData?.expenses||[]).slice(-6).reverse().map(e=>`<li>${e.date} — ${e.category}: ${fmt(e.amount)} (${e.method})</li>`).join('');
+
+  // Smart Insights (3 سطور)
+  fillSmartInsights();
+}
+
+/* ===== Smart Insights (Dashboard) ===== */
+function fillSmartInsights(){
+  const list = byId('insights-list'); list.innerHTML='';
+  const exps = userData?.expenses || [];
+  // هذا الشهر و الشهر الماضي
+  const nowKey = monthKey(todayISO());
+  const lastKey = (()=>{ const d=new Date(); d.setMonth(d.getMonth()-1); return d.toISOString().slice(0,7); })();
+  const sumByMonth = (k)=> exps.filter(e=>monthKey(e.date)===k).reduce((a,x)=>a+Number(x.amount||0),0);
+  const thisM = sumByMonth(nowKey);
+  const lastM = sumByMonth(lastKey);
+  const diffPct = lastM? Math.round((thisM-lastM)/lastM*100): (thisM?100:0);
+  const topCat = (()=>{ const m={}; exps.filter(e=>monthKey(e.date)===nowKey).forEach(e=>m[e.category]=(m[e.category]||0)+Number(e.amount||0)); const s=Object.entries(m).sort((a,b)=>b[1]-a[1])[0]; return s? s[0]:'—'; })();
+
+  // تنبؤ بسيط: المسار اليومي × ما تبقى من الشهر
+  const day = new Date().getDate();
+  const avgDay = thisM / Math.max(1, day);
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+  const forecast = avgDay * daysInMonth;
+
+  const li = (t)=>{ const el=document.createElement('li'); el.textContent=t; return el; };
+  if(lastM>0) list.appendChild(li(`You spent ${Math.abs(diffPct)}% ${diffPct>=0?'more':'less'} than last month.`));
+  else list.appendChild(li(`Spending started this month. Keep tracking!`));
+  list.appendChild(li(`Most of your spending is in: ${topCat}.`));
+  list.appendChild(li(`Projected month-end expenses ≈ ${fmt(forecast)}.`));
+}
+
+/* ===== Mini charts on Dashboard ===== */
+let miniCommitChart, miniSavingsChart;
+function buildMiniCharts(){
+  // Commitments doughnut
+  const cs = userData?.commitments||[];
+  const statusCount = {Paid:0,'Due soon':0,Overdue:0,Pending:0};
+  cs.forEach(c=> statusCount[statusFromDue(c.due,c.status)]++);
+  const ctx1 = byId('miniCommit').getContext('2d');
+  if(miniCommitChart) miniCommitChart.destroy();
+  miniCommitChart = new Chart(ctx1,{ type:'doughnut',
+    data:{ labels:Object.keys(statusCount), datasets:[{ data:Object.values(statusCount) }] },
+    options:{ plugins:{legend:{display:false}}, cutout:'60%' }
+  });
+
+  // Savings overall progress (متوسط نسبة التقدم)
+  const ss = userData?.savings||[];
+  let avg=0;
+  if(ss.length){
+    const totalTarget = ss.reduce((a,x)=>a+Number(x.target||0),0);
+    const totalSaved  = ss.reduce((a,x)=>a+Number(x.saved||0),0);
+    avg = totalTarget? Math.round(totalSaved*100/totalTarget):0;
+  }
+  const ctx2 = byId('miniSavings').getContext('2d');
+  if(miniSavingsChart) miniSavingsChart.destroy();
+  miniSavingsChart = new Chart(ctx2,{ type:'doughnut',
+    data:{ labels:['Progress','Remaining'], datasets:[{ data:[avg, 100-avg] }] },
+    options:{ plugins:{legend:{display:false}}, cutout:'60%' }
+  });
 }
 
 /* ===== Tables ===== */
@@ -546,99 +630,180 @@ function redrawEvents(){
   setText('ev_next', nextDays===null?'—':`${nextDays} day(s)`);
 }
 
+/* ===== Text Insights (Analysis tab) ===== */
+function fillTextInsights(){
+  const el = byId('txtInsights'); el.innerHTML='';
+  const exps = userData?.expenses || [];
+  if(!exps.length){ el.innerHTML='<li>No data yet. Add some expenses to see insights.</li>'; return; }
+  const groupBy = (arr, f)=> arr.reduce((m,x)=>{ const k=f(x); m[k]=(m[k]||0)+Number(x.amount||0); return m; },{});
+  const byMonth = groupBy(exps, e=>monthKey(e.date));
+  const months = Object.keys(byMonth).sort();
+  const topMonth = months.sort((a,b)=>byMonth[b]-byMonth[a])[0];
+
+  // rate: savings / income (تقريبي من خطط الادخار المسجّلة)
+  const sav = (userData?.savings||[]).reduce((a,x)=>a+Number(x.saved||0),0);
+  const income = (userData?.budget||[]).filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount||0),0);
+  const rate = income? Math.round(sav*100/income):0;
+
+  // expense / income ratio
+  const thisKey = monthKey(todayISO());
+  const curExp = exps.filter(e=>monthKey(e.date)===thisKey).reduce((a,x)=>a+Number(x.amount||0),0);
+  const ratio = income? Math.round(curExp*100/income):0;
+
+  const catAgg = groupBy(exps, e=>e.category);
+  const top3 = Object.entries(catAgg).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>k).join(', ');
+  const least = Object.entries(catAgg).sort((a,b)=>a[1]-b[1])[0]?.[0] || '—';
+
+  const li=t=>{ const x=document.createElement('li'); x.textContent=t; el.appendChild(x); };
+  li(`Top 3 categories: ${top3}`);
+  li(`Least used category: ${least}`);
+  li(`Month with highest expenses: ${topMonth||'—'}`);
+  li(`Average saving rate: ${rate}%`);
+  li(`Expense to income ratio (current month): ${ratio}%`);
+}
+
+/* ===== Charts (Analysis tab) ===== */
+let chPie, chBar, chLine, chDoughnut, chRadar;
+function buildCharts(){
+  const exps = userData?.expenses || [];
+  const cmts = userData?.commitments || [];
+  const bud  = userData?.budget || [];
+
+  // --- Pie: by category (current month)
+  const thisKey = monthKey(todayISO());
+  const catMap = {};
+  exps.filter(e=>monthKey(e.date)===thisKey).forEach(e=> catMap[e.category]=(catMap[e.category]||0)+Number(e.amount||0));
+  const pieLabels = Object.keys(catMap); const pieData = Object.values(catMap);
+  if(chPie) chPie.destroy();
+  chPie = new Chart(byId('chPie'), { type:'pie', data:{ labels:pieLabels, datasets:[{ data:pieData }] }, options:{ plugins:{legend:{position:'bottom'}} }});
+
+  // --- Bar: monthly trend last 6 months (expenses)
+  const trend = {};
+  for(let i=5;i>=0;i--){
+    const d=new Date(); d.setMonth(d.getMonth()-i);
+    const k=d.toISOString().slice(0,7);
+    trend[k]= exps.filter(e=>monthKey(e.date)===k).reduce((a,x)=>a+Number(x.amount||0),0);
+  }
+  if(chBar) chBar.destroy();
+  chBar = new Chart(byId('chBar'), { type:'bar',
+    data:{ labels:Object.keys(trend), datasets:[{ label:'Expenses', data:Object.values(trend) }] },
+    options:{ plugins:{legend:{display:false}} }
+  });
+
+  // --- Line: income vs expenses (current month vs budget income)
+  const income = bud.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount||0),0);
+  const expSum = exps.filter(e=>monthKey(e.date)===thisKey).reduce((a,x)=>a+Number(x.amount||0),0);
+  if(chLine) chLine.destroy();
+  chLine = new Chart(byId('chLine'), { type:'line',
+    data:{ labels:['Income','Expenses'], datasets:[{ label:'This Month', data:[income, expSum] }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true } } }
+  });
+
+  // --- Doughnut: commitments status
+  const statusCount = {Paid:0,'Due soon':0,Overdue:0,Pending:0};
+  cmts.forEach(c=> statusCount[statusFromDue(c.due,c.status)]++);
+  if(chDoughnut) chDoughnut.destroy();
+  chDoughnut = new Chart(byId('chDoughnut'), { type:'doughnut',
+    data:{ labels:Object.keys(statusCount), datasets:[{ data:Object.values(statusCount) }] },
+    options:{ plugins:{legend:{position:'bottom'}}, cutout:'55%' }
+  });
+
+  // --- Radar: spending behavior (macro buckets)
+  const buckets = { Food:0, Transport:0, Living:0, Lifestyle:0, Other:0 };
+  exps.forEach(e=>{
+    const c=e.category;
+    if(['Groceries','Coffee & Snacks','Dining Out'].includes(c)) buckets.Food += Number(e.amount||0);
+    else if(['Fuel / Gas','Public Transport','Car Maintenance'].includes(c)) buckets.Transport += Number(e.amount||0);
+    else if(['Rent / Mortgage','Electricity','Water','Internet & Phone','Home Maintenance'].includes(c)) buckets.Living += Number(e.amount||0);
+    else if(['Entertainment','Hobbies & Subscriptions','Gym / Fitness','Personal Care','Clothing & Accessories'].includes(c)) buckets.Lifestyle += Number(e.amount||0);
+    else buckets.Other += Number(e.amount||0);
+  });
+  if(chRadar) chRadar.destroy();
+  chRadar = new Chart(byId('chRadar'), { type:'radar',
+    data:{ labels:Object.keys(buckets), datasets:[{ label:'Spending', data:Object.values(buckets) }] },
+    options:{ plugins:{legend:{display:false}} }
+  });
+
+  // Mini charts refresh
+  buildMiniCharts();
+}
+
 /* ===== Glue render ===== */
-function renderAll(){ renderKPIs(); redrawBudget(); redrawExpenses(); redrawCommitments(); redrawSavings(); redrawPayments(); redrawEvents(); renderAnalysis(); }
+function renderAll(){ renderKPIs(); redrawBudget(); redrawExpenses(); redrawCommitments(); redrawSavings(); redrawPayments(); redrawEvents(); buildMiniCharts(); }
 
 /* ===== Add handlers ===== */
 byId('btnAddB').onclick = async ()=>{
-  try{
-    await ensureUserRef();
-    const item = { id:crypto.randomUUID(), item:byId('b_item').value.trim(), type:byId('b_type').value, amount:Number(byId('b_amt').value||0) };
-    if(!item.item || !item.amount) return alert('Enter item & amount');
-    await updateArray('budget', item);
-    byId('b_item').value=''; byId('b_amt').value='';
-  }catch(e){ alert(e.message||'Failed to add.'); }
+  if(!uid) return alert('Sign in first.');
+  const item = { id:crypto.randomUUID(), item:byId('b_item').value, type:byId('b_type').value, amount:Number(byId('b_amt').value||0) };
+  if(!item.item || !item.amount) return alert('Enter item & amount');
+  await updateArray('budget', item);
+  byId('b_item').value=''; byId('b_amt').value='';
 };
 byId('btnAddE').onclick = async ()=>{
-  try{
-    await ensureUserRef();
-    const it = { id:crypto.randomUUID(), date:byId('e_date').value||todayISO(), category:byId('e_cat').value, description:byId('e_desc').value||'', amount:Number(byId('e_amt').value||0), method:byId('e_method').value };
-    if(!it.amount) return alert('Amount?');
-    await updateArray('expenses', it); byId('e_desc').value=''; byId('e_amt').value='';
-  }catch(e){ alert(e.message||'Failed to add.'); }
+  if(!uid) return alert('Sign in first.');
+  const it = { id:crypto.randomUUID(), date:byId('e_date').value||todayISO(), category:byId('e_cat').value, description:byId('e_desc').value||'', amount:Number(byId('e_amt').value||0), method:byId('e_method').value };
+  if(!it.amount) return alert('Amount?');
+  await updateArray('expenses', it); byId('e_desc').value=''; byId('e_amt').value='';
 };
 byId('btnAddC').onclick = async ()=>{
-  try{
-    await ensureUserRef();
-    const it = { id:crypto.randomUUID(), name:byId('c_name').value.trim(), category:byId('c_cat').value, amount:Number(byId('c_amount').value||0), due:byId('c_due').value, status:"Pending", remind:byId('c_remind').checked, remindDays:Number(byId('c_remindWhen').value) };
-    if(!it.name || !it.amount || !it.due) return alert('Enter name, amount, due');
-    await updateArray('commitments', it);
-    if(it.remind){
-      const when = new Date(it.due); when.setDate(when.getDate()-it.remindDays);
-      scheduleLocalReminder({ id:it.id, title:'Commitment Reminder', body:`${it.name} due ${it.due} (${fmt(it.amount)})`, fireAt:when.getTime() });
-    }
-    byId('c_name').value=''; byId('c_amount').value=''; byId('c_due').value='';
-  }catch(e){ alert(e.message||'Failed to add.'); }
+  if(!uid) return alert('Sign in first.');
+  const it = { id:crypto.randomUUID(), name:byId('c_name').value, category:byId('c_cat').value, amount:Number(byId('c_amount').value||0), due:byId('c_due').value, status:"Pending", remind:byId('c_remind').checked, remindDays:Number(byId('c_remindWhen').value) };
+  if(!it.name || !it.amount || !it.due) return alert('Enter name, amount, due');
+  await updateArray('commitments', it);
+  if(it.remind){
+    const when = new Date(it.due); when.setDate(when.getDate()-it.remindDays);
+    scheduleLocalReminder({ id:it.id, title:'Commitment Reminder', body:`${it.name} due ${it.due} (${fmt(it.amount)})`, fireAt:when.getTime() });
+  }
+  byId('c_name').value=''; byId('c_amount').value=''; byId('c_due').value='';
 };
 byId('btnAddS').onclick = async ()=>{
-  try{
-    await ensureUserRef();
-    const name=byId('s_name').value.trim(), cat=byId('s_cat').value, target=Number(byId('s_target').value||0), months=Number(byId('s_months').value||0);
-    if(!name||!target||!months) return alert('Fill goal, target, months');
-    const start=byId('s_start').value||todayISO(); const end = (d=>{d.setMonth(d.getMonth()+months);return d.toISOString().slice(0,10)})(new Date(start));
-    byId('s_end').value=end;
-    const monthly = target/months;
-    const it = { id:crypto.randomUUID(), name, category:cat, target, months, monthly, start, end, saved:0 };
-    await updateArray('savings', it);
-    if(byId('s_toCommit').checked){
-      await updateArray('commitments', { id:crypto.randomUUID(), name:`Saving – ${name}`, category:'Savings / Investments', amount:monthly, due:start, status:'Pending', remind:true, remindDays:7 });
-    }
-    byId('s_name').value=''; byId('s_target').value=''; byId('s_months').value='';
-  }catch(e){ alert(e.message||'Failed to add.'); }
+  if(!uid) return alert('Sign in first.');
+  const name=byId('s_name').value, cat=byId('s_cat').value, target=Number(byId('s_target').value||0), months=Number(byId('s_months').value||0);
+  if(!name||!target||!months) return alert('Fill goal, target, months');
+  const start=byId('s_start').value||todayISO(); const end = (d=>{d.setMonth(d.getMonth()+months);return d.toISOString().slice(0,10)})(new Date(start));
+  byId('s_end').value=end;
+  const monthly = target/months;
+  const it = { id:crypto.randomUUID(), name, category:cat, target, months, monthly, start, end, saved:0, autoDebit:true, lastAutoMonth:null };
+  await updateArray('savings', it);
+  if(byId('s_toCommit').checked){
+    await updateArray('commitments', { id:crypto.randomUUID(), name:`Saving – ${name}`, category:'Savings / Investments', amount:monthly, due:start, status:'Pending', remind:true, remindDays:7 });
+  }
+  byId('s_name').value=''; byId('s_target').value=''; byId('s_months').value='';
 };
 byId('btnAddP').onclick = async ()=>{
-  try{
-    await ensureUserRef();
-    const it = { id:crypto.randomUUID(), type:byId('p_type').value, ref:byId('p_ref').value.trim(), amount:Number(byId('p_amt').value||0), date:byId('p_date').value||todayISO() };
-    if(!it.amount || !it.ref) return alert('Ref & amount required');
-    await updateArray('payments', it); byId('p_ref').value=''; byId('p_amt').value='';
-  }catch(e){ alert(e.message||'Failed to add.'); }
-};
-byId('btnAddEV').onclick = async ()=>{
-  try{
-    await ensureUserRef();
-    const name=byId('ev_name').value.trim(), type=byId('ev_type').value, date=byId('ev_date').value, planned=Number(byId('ev_amt').value||0), notes=byId('ev_notes').value||'';
-    if(!name||!date) return alert('Event name & date required');
-    const it = { id:crypto.randomUUID(), eventName:name, eventType:type, eventDate:date, planned, notes };
-    await updateArray('events', it);
-    if(byId('ev_toCommit').checked && planned>0){
-      await updateArray('commitments', { id:crypto.randomUUID(), name:`Gift – ${name}`, category:'Gifts & Celebrations', amount:planned, due:date, status:'Pending', remind:true, remindDays:7 });
+  if(!uid) return alert('Sign in first.');
+  const it = { id:crypto.randomUUID(), type:byId('p_type').value, ref:byId('p_ref').value, amount:Number(byId('p_amt').value||0), date:byId('p_date').value||todayISO() };
+  if(!it.amount || !it.ref) return alert('Ref & amount required');
+  // إذا Saving: حدّث الهدف تلقائيًا
+  if(it.type==='Saving'){
+    const ss = (userData?.savings||[]);
+    const idx = ss.findIndex(s=> (s.name||'').trim().toLowerCase() === (it.ref||'').trim().toLowerCase());
+    if(idx>-1){
+      const g = ss[idx];
+      const remain = Math.max(0, Number(g.target)-Number(g.saved||0));
+      const add = Math.min(remain, Number(it.amount));
+      ss[idx] = {...g, saved: Number(g.saved||0)+add };
+      await updateDoc(userDocRef, { savings: ss });
+      if(add < it.amount) alert('Amount exceeds goal target; extra ignored.');
     }
-    byId('ev_name').value=''; byId('ev_amt').value=''; byId('ev_notes').value='';
-  }catch(e){ alert(e.message||'Failed to add.'); }
-};
-byId('btnSaveNotes').onclick = async ()=>{
-  try{ await ensureUserRef(); await updateDoc(userDocRef, { notes: byId('notes').value||'' }); alert('Notes saved.'); }
-  catch(e){ alert(e.message||'Failed to save notes.'); }
+  }
+  await updateArray('payments', it); byId('p_ref').value=''; byId('p_amt').value='';
 };
 
 /* ===== Row helpers ===== */
 async function rowActionCommit(act,id){
-  try{
-    await ensureUserRef();
-    if(act==='paid'){
-      const list = (userData.commitments||[]).map(x=> x.id===id? {...x, status:'Paid'}:x );
-      await updateDoc(userDocRef,{ commitments:list });
-    } else if(act==='del'){ await delRow('commitments', id); }
-  }catch(e){ alert(e.message||'Failed.'); }
+  if(act==='paid'){
+    const list = (userData.commitments||[]).map(x=> x.id===id? {...x, status:'Paid'}:x );
+    await updateDoc(userDocRef,{ commitments:list });
+  } else if(act==='del'){ await delRow('commitments', id); }
 }
 async function delRow(collectionKey, id){
-  await ensureUserRef();
   const list = (userData[collectionKey]||[]).filter(x=>x.id!==id);
   await updateDoc(userDocRef, { [collectionKey]: list });
 }
 async function updateArray(key, item){
-  await ensureUserRef();
+  const docSnap = await getDoc(userDocRef);
+  if(!docSnap.exists()) await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value } });
   await updateDoc(userDocRef, { [key]: arrayUnion(item) });
 }
 
@@ -648,38 +813,63 @@ byId('s_start').addEventListener('change', ()=>{
   const s = new Date(byId('s_start').value); s.setMonth(s.getMonth()+months); byId('s_end').value = s.toISOString().slice(0,10);
 });
 
+/* ===== Auto-debit for savings (monthly once) ===== */
+function ensureSavingsAutoDebit(){
+  const ss = (userData?.savings||[]);
+  const nowMK = monthKey(todayISO());
+  let changed=false;
+  ss.forEach(s=>{
+    if(s.autoDebit && s.lastAutoMonth!==nowMK){
+      const remain = Math.max(0, Number(s.target)-Number(s.saved||0));
+      if(remain>0){
+        const pay = Math.min(remain, Number(s.monthly||0));
+        s.saved = Number(s.saved||0)+pay;
+        s.lastAutoMonth = nowMK;
+        changed=true;
+        // أضف سجل Payment تلقائي
+        const payItem = { id:crypto.randomUUID(), type:'Saving', ref:s.name, amount:pay, date:todayISO() };
+        updateArray('payments', payItem);
+      }
+    }
+  });
+  if(changed){ updateDoc(userDocRef, { savings: ss }); }
+}
+
 /* ===== Auth listener ===== */
 onAuthStateChanged(auth, async (user)=>{
   if(user){
     uid = user.uid;
     btnGoogle.style.display='none'; btnLogout.style.display='';
     userDocRef = doc(db,'users',uid);
-    await ensureUserRef();
+    const snap = await getDoc(userDocRef);
+    if(!snap.exists()){
+      await setDoc(userDocRef, { prefs:{ name:nameEl.value, currency:currencyEl.value, accent:accentEl.value }, budget:[], expenses:[], commitments:[], savings:[], payments:[], events:[], notes:'' });
+    }
     onSnapshot(userDocRef,(s)=>{
       userData = s.data() || {};
       const p = userData.prefs||{};
       nameEl.value = p.name || nameEl.value; currencyEl.value = p.currency || currencyEl.value; accentEl.value = p.accent || accentEl.value;
       byId('notes').value = userData.notes || '';
       renderAll();
+      ensureSavingsAutoDebit();
     });
   }else{
-    uid=null; userData=null; userDocRef=null;
+    uid=null; userData=null;
     btnGoogle.style.display=''; btnLogout.style.display='none';
     renderAll();
   }
 });
 
+/* ===== Notes save ===== */
+byId('btnSaveNotes').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  await updateDoc(userDocRef, { notes: byId('notes').value||'' });
+  alert('Notes saved.');
+};
+
 /* ===== Initial show ===== */
 document.querySelectorAll('section[id^="tab-"]').forEach((s,i)=> s.style.display = i? 'none':'grid');
-function renderAnalysis(){
-  const exps = userData?.expenses||[];
-  setText('a_month_total', fmt(exps.reduce((a,x)=>a+Number(x.amount||0),0)));
-  setText('a_tx', exps.length);
-  const perCat={}; exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
-  const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
-  setText('a_top', top);
-}
 renderAll();
 </script>
 </body>
-        </html>
+                                                            </html>
