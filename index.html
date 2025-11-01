@@ -5,11 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Smart Budget & Commitments Dashboard</title>
 
+<!-- PWA manifest + icons -->
 <link rel="manifest" href="/Manifest.webmanifest">
 <meta name="theme-color" content="#0f1f39"/>
 
+<!-- Favicon (classic) -->
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/icons/icon-64.png">
+<link rel="icon" type="image/png" sizes="128x128" href="/icons/icon-128.png">
+
+<!-- PWA icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="256x256" href="/icons/icon-256.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+
+<!-- iOS/Apple -->
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Smart Budget">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"/>
 
@@ -286,14 +302,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ===== Firebase config (من مشروعك) ===== */
+/* ===== Firebase config ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyCfnCTuunR_E15GQaPQyUbS2Fdj6XAYfUo",
   authDomain: "smart-budget-61664.firebaseapp.com",
   projectId: "smart-budget-61664",
   storageBucket: "smart-budget-61664.appspot.com",
   messagingSenderId: "273780649075",
-  appId: "1:273780649075:web:c0c08d6d56f5085e9e0e06"
+  appId: "1:273780649075:web:c0c08d6d56f5085e9e06"
 };
 
 const appFB = initializeApp(firebaseConfig);
@@ -301,7 +317,7 @@ const auth = getAuth(appFB);
 const db = getFirestore(appFB);
 const provider = new GoogleAuthProvider();
 
-/* ===== OneSignal (App ID لك) ===== */
+/* ===== OneSignal ===== */
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
@@ -309,7 +325,8 @@ OneSignalDeferred.push(async function(OneSignal) {
     allowLocalhostAsSecureOrigin: true
   });
 });
-/* ===== UI helpers ===== */
+
+/* ===== Helpers/UI ===== */
 const $ = s => document.querySelector(s);
 const byId = id => document.getElementById(id);
 const setText = (id,t)=>{ const el=byId(id); if(el) el.textContent = t; };
@@ -348,11 +365,11 @@ function fillSelect(sel, items){ sel.innerHTML = items.map(x=>`<option>${x}</opt
 fillSelect(byId('e_cat'), FULL_CATEGORIES);
 fillSelect(byId('c_cat'), FULL_CATEGORIES);
 
-/* ===== Inputs & buttons refs ===== */
+/* ===== Inputs & buttons ===== */
 const nameEl=byId('userName'), currencyEl=byId('currency'), accentEl=byId('accent');
 const btnGoogle=byId('btnGoogle'), btnLogout=byId('btnLogout'), btnNotify=byId('btnNotify');
 
-/* ===== Local prefs (قبل تسجيل الدخول) ===== */
+/* ===== Local prefs ===== */
 nameEl.value = localStorage.getItem('sb_name') || '';
 currencyEl.value = localStorage.getItem('sb_cur') || '€ EUR';
 accentEl.value = localStorage.getItem('sb_accent') || 'Blue';
@@ -400,7 +417,7 @@ function scheduleLocalReminder(payload){
   navigator.serviceWorker.controller.postMessage({type:'schedule', payload});
 }
 
-/* ===== Renderers (Dashboard KPIs) ===== */
+/* ===== Renderers (KPIs) ===== */
 function renderKPIs(){
   const name = nameEl.value || 'Guest';
   setText('welcome', `Welcome, ${name} 👋`);
@@ -409,7 +426,6 @@ function renderKPIs(){
   const cmt  = userData?.commitments || [];
   const bud  = userData?.budget || [];
 
-  // balance = income - (expenses + fixed)
   const income = bud.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount||0),0);
   const fixed  = bud.filter(x=>x.type!=='income').reduce((a,x)=>a+Number(x.amount||0),0);
   const expTot = exps.reduce((a,x)=>a+Number(x.amount||0),0);
@@ -420,17 +436,14 @@ function renderKPIs(){
   setText('kpi-paid-count', `${paid}/${cmt.length}`);
   byId('kpi-paid').style.width = (cmt.length? Math.round(paid*100/cmt.length):0)+'%';
 
-  // next due
   const upcoming = cmt.filter(x=>x.status!=='Paid' && x.due).map(x=>({name:x.name,days:daysUntil(x.due)})).sort((a,b)=>a.days-b.days)[0];
   setText('kpi-next-due', upcoming? `${upcoming.days} day(s) — ${upcoming.name}` : '—');
 
-  // events
   const evs = userData?.events || [];
   const now = new Date();
   const nextEv = evs.map(x=>({name:x.eventName,date:new Date(x.eventDate)})).filter(x=>x.date>=now).map(x=>({name:x.name,days:Math.ceil((x.date-now)/86400000)})).sort((a,b)=>a.days-b.days)[0];
   setText('kpi-next-event', nextEv? `${nextEv.days} day(s) — ${nextEv.name}` : '—');
 
-  // snapshot
   const perCat = {};
   exps.forEach(e=> perCat[e.category]=(perCat[e.category]||0)+Number(e.amount||0));
   const top = Object.entries(perCat).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>k).join(', ') || '—';
@@ -439,7 +452,7 @@ function renderKPIs(){
   byId('dash-recent').innerHTML = exps.slice(-6).reverse().map(e=>`<li>${e.date} — ${e.category}: ${fmt(e.amount)} (${e.method})</li>`).join('');
 }
 
-/* ===== Tables (Budget / Expenses / Commitments / Savings / Payments / Events / Notes) ===== */
+/* ===== Tables ===== */
 function redrawBudget(){
   const tbody = byId('b_table').querySelector('tbody'); const items = userData?.budget||[];
   tbody.innerHTML = items.map(x=>`<tr><td>${x.item}</td><td>${x.type}</td><td>${fmt(x.amount)}</td><td><button class="ghost" data-bid="${x.id}">Delete</button></td></tr>`).join('');
