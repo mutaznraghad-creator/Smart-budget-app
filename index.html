@@ -119,7 +119,6 @@ canvas.mini{height:160px}
       <div class="h2" id="welcome">Welcome, Guest 👋</div>
       <blockquote>“Track your money. Master your life.”</blockquote>
 
-      <!-- Quick Overview -->
       <div class="grid grid-3" style="margin-top:10px">
         <div class="card kpi"><div class="muted small">Current Balance</div><div class="big" id="kpi-balance">€ 0.00</div></div>
         <div class="card kpi"><div class="muted small">Total Expenses (month)</div><div class="big" id="kpi-exp">€ 0.00</div></div>
@@ -293,6 +292,39 @@ canvas.mini{height:160px}
       <div class="row" style="margin-top:8px">
         <button id="btnCompare" class="ghost">Compare to last month</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== EVENTS (أُضيف بالكامل) ===== -->
+  <section id="tab-events" class="grid">
+    <div class="card">
+      <div class="h2">Events & Gifts</div>
+      <div class="row">
+        <input id="ev_name" placeholder="Event (e.g. Mom's Birthday)" style="flex:2">
+        <select id="ev_type">
+          <option>Birthday</option><option>Anniversary</option>
+          <option>Holiday</option><option>Gift</option><option>Other</option>
+        </select>
+        <input id="ev_date" type="date">
+        <input id="ev_amt" type="number" step="0.01" placeholder="Planned spend">
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="ev_toCommit" style="margin-right:8px">Add to Commitments</label>
+        <textarea id="ev_notes" placeholder="Notes…" style="flex:1"></textarea>
+        <button id="btnAddEV">+ Add Event</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div class="h2" style="margin:0">Planner</div>
+        <div class="right muted">Next in: <span id="ev_next">—</span> | Gifts budget: <span id="ev_gifts">0.00</span></div>
+      </div>
+      <table id="ev_table">
+        <thead>
+          <tr><th>Event</th><th>Type</th><th>Date</th><th>Planned</th><th>Reminder</th><th>Notes</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 
@@ -598,6 +630,8 @@ function redrawEvents(){
     </tr>`;
   }).join('');
   tbody.querySelectorAll('button').forEach(b=> b.onclick=()=> delRow('events', b.dataset.id));
+  setText('ev_gifts', (giftsTotal||0).toFixed(2));
+  setText('ev_next', nextDays===null?'—':`${nextDays} day(s)`);
 }
 
 /* ===== Text Insights (Analysis) + Compare toggle ===== */
@@ -611,7 +645,6 @@ if (btnCompareEl) {
     fillTextInsights();
   };
 }
-
 function fillTextInsights(){
   const el = byId('txtInsights'); el.innerHTML='';
   if (compareMode) { el.insertAdjacentHTML('beforeend','<li>Comparison mode: showing current vs last month.</li>'); }
@@ -796,6 +829,26 @@ byId('btnAddP').onclick = async ()=>{
   }
   await updateArray('payments', it); byId('p_ref').value=''; byId('p_amt').value='';
 };
+/* Events add */
+byId('btnAddEV').onclick = async ()=>{
+  if(!uid) return alert('Sign in first.');
+  const name=byId('ev_name').value, type=byId('ev_type').value,
+        date=byId('ev_date').value, planned=Number(byId('ev_amt').value||0),
+        notes=byId('ev_notes').value||'';
+  if(!name||!date) return alert('Event name & date required');
+
+  const it = { id:crypto.randomUUID(), eventName:name, eventType:type, eventDate:date, planned, notes };
+  await updateArray('events', it);
+
+  if(byId('ev_toCommit').checked && planned>0){
+    await updateArray('commitments', {
+      id:crypto.randomUUID(), name:`Gift – ${name}`, category:'Gifts & Celebrations',
+      amount:planned, due:date, status:'Pending', remind:true, remindDays:7
+    });
+  }
+
+  byId('ev_name').value=''; byId('ev_amt').value=''; byId('ev_notes').value='';
+};
 
 /* Row helpers */
 async function rowActionCommit(act,id){
@@ -878,4 +931,4 @@ document.querySelectorAll('section[id^="tab-"]').forEach((s,i)=> s.style.display
 renderAll();
 </script>
 </body>
-  </html>
+</html>
